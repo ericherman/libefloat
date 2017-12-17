@@ -59,6 +59,12 @@ int main(int argc, char **argv)
 	int64_t err, cnt;
 	int verbose;
 
+	if (sizeof(efloat64) != sizeof(int64_t)) {
+		fprintf(stderr, "sizeof(efloat64) %d != sizeof(int64_t) %d!\n",
+			sizeof(efloat64), sizeof(int64_t));
+		return EXIT_FAILURE;
+	}
+
 	verbose = argc > 1 ? atoi(argv[1]) : 0;
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
@@ -91,21 +97,24 @@ int main(int argc, char **argv)
 		if (i == efloat64_to_int64(f)) {
 			err += round_trip64(f);
 		} else {
-			fprintf(stderr, "%ld fails float round trip\n",
-				(long)i);
+			fprintf(stderr,
+				"%lld fails int-float-int round trip as %lld\n",
+				(long long)i, (long long)efloat64_to_int64(f));
 			return 1;
 		}
 		f = int64_to_efloat64(-i);
 		if (-i == efloat64_to_int64(f)) {
 			err += round_trip64(f);
 		} else {
-			fprintf(stderr, "%ld fails float round trip\n",
-				(long)-i);
+			fprintf(stderr,
+				"%lld fails int-float-int round trip as %lld\n",
+				(long long)-i, (long long)efloat64_to_int64(f));
 			return 1;
 		}
 	}
 	if (verbose) {
-		printf("attempted %lu values, %lu errors\n", cnt, err);
+		printf("attempted %llu values, %llu errors\n",
+		       (unsigned long long)cnt, (unsigned long long)err);
 	}
 	return (err == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

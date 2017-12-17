@@ -59,6 +59,12 @@ int main(int argc, char **argv)
 	int64_t err, cnt;
 	int verbose;
 
+	if (sizeof(efloat32) != sizeof(int32_t)) {
+		fprintf(stderr, "sizeof(efloat32) %d != sizeof(int32_t) %d!\n",
+			sizeof(efloat32), sizeof(int32_t));
+		return EXIT_FAILURE;
+	}
+
 	verbose = argc > 1 ? atoi(argv[1]) : 0;
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
@@ -91,21 +97,24 @@ int main(int argc, char **argv)
 		if (i == efloat32_to_int32(f)) {
 			err += round_trip32(f);
 		} else {
-			fprintf(stderr, "%ld fails float round trip\n",
-				(long)i);
+			fprintf(stderr,
+				"%ld fails int-float-int round trip as %ld\n",
+				(long)i, (long)efloat32_to_int32(f));
 			return 1;
 		}
 		f = int32_to_efloat32(-i);
 		if (-i == efloat32_to_int32(f)) {
 			err += round_trip32(f);
 		} else {
-			fprintf(stderr, "%ld fails float round trip\n",
-				(long)-i);
+			fprintf(stderr,
+				"%ld fails int-float-int round trip as %ld\n",
+				(long)-i, (long)efloat32_to_int32(f));
 			return 1;
 		}
 	}
 	if (verbose) {
-		printf("attempted %lu values, %lu errors\n", cnt, err);
+		printf("attempted %llu values, %llu errors\n",
+		       (unsigned long long)cnt, (unsigned long long)err);
 	}
 	return (err == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
