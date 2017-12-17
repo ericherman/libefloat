@@ -132,35 +132,35 @@ enum efloat_class {
 };
 
 #if ((defined efloat32_exists) && (efloat32_exists))
-#define efloat32_le_r2_exp_max 127
-#define efloat32_le_r2_exp_min -127
-#define efloat32_le_r2_exp_inf_nan 128
-#define efloat32_le_r2_sign_mask 0x80000000UL
-#define efloat32_le_r2_rexp_mask 0x7F800000UL
-#define efloat32_le_r2_signif_mask 0x007FFFFFUL
-#define efloat32_le_r2_exp_shift 23
+#define efloat32_r2_exp_max 127
+#define efloat32_r2_exp_min -127
+#define efloat32_r2_exp_inf_nan 128
+#define efloat32_r2_sign_mask 0x80000000UL
+#define efloat32_r2_rexp_mask 0x7F800000UL
+#define efloat32_r2_signif_mask 0x007FFFFFUL
+#define efloat32_r2_exp_shift 23
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists) \
  && (__SIZEOF_LONG__ >= 8))
-#define efloat64_le_r2_exp_max 1023L
-#define efloat64_le_r2_exp_min -1023L
-#define efloat64_le_r2_exp_inf_nan 1024L
-#define efloat64_le_r2_sign_mask 0x8000000000000000UL
-#define efloat64_le_r2_rexp_mask 0x7FF0000000000000UL
-#define efloat64_le_r2_signif_mask 0x000FFFFFFFFFFFFFUL
-#define efloat64_le_r2_exp_shift 52
+#define efloat64_r2_exp_max 1023L
+#define efloat64_r2_exp_min -1023L
+#define efloat64_r2_exp_inf_nan 1024L
+#define efloat64_r2_sign_mask 0x8000000000000000UL
+#define efloat64_r2_rexp_mask 0x7FF0000000000000UL
+#define efloat64_r2_signif_mask 0x000FFFFFFFFFFFFFUL
+#define efloat64_r2_exp_shift 52
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists) \
  && (__SIZEOF_LONG__ < 8 &&  __SIZEOF_LONG_LONG__ >= 8))
-#define efloat64_le_r2_exp_max 1023L
-#define efloat64_le_r2_exp_min -1023L
-#define efloat64_le_r2_exp_inf_nan 1024L
-#define efloat64_le_r2_sign_mask 0x8000000000000000ULL
-#define efloat64_le_r2_rexp_mask 0x7FF0000000000000ULL
-#define efloat64_le_r2_signif_mask 0x000FFFFFFFFFFFFFULL
-#define efloat64_le_r2_exp_shift 52
+#define efloat64_r2_exp_max 1023L
+#define efloat64_r2_exp_min -1023L
+#define efloat64_r2_exp_inf_nan 1024L
+#define efloat64_r2_sign_mask 0x8000000000000000ULL
+#define efloat64_r2_rexp_mask 0x7FF0000000000000ULL
+#define efloat64_r2_signif_mask 0x000FFFFFFFFFFFFFULL
+#define efloat64_r2_exp_shift 52
 #endif
 
 #if ((defined efloat32_exists) && (efloat32_exists))

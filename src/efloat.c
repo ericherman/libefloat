@@ -129,15 +129,15 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 
 	u32 = efloat32_to_uint32(f);
 
-	*sign = (u32 & efloat32_le_r2_sign_mask) ? 1U : 0U;
+	*sign = (u32 & efloat32_r2_sign_mask) ? 1U : 0U;
 
-	raw_exp = (u32 & efloat32_le_r2_rexp_mask);
-	raw_exp = (raw_exp >> efloat32_le_r2_exp_shift);
-	*exponent = (raw_exp - efloat32_le_r2_exp_max);
+	raw_exp = (u32 & efloat32_r2_rexp_mask);
+	raw_exp = (raw_exp >> efloat32_r2_exp_shift);
+	*exponent = (raw_exp - efloat32_r2_exp_max);
 
-	*significand = u32 & efloat32_le_r2_signif_mask;
+	*significand = u32 & efloat32_r2_signif_mask;
 
-	if (*exponent == efloat32_le_r2_exp_inf_nan) {
+	if (*exponent == efloat32_r2_exp_inf_nan) {
 		if (*significand) {
 			/* +/- nan */
 			return ef_nan;
@@ -147,12 +147,12 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 		}
 	}
 
-	if (*significand == 0 && *exponent == efloat32_le_r2_exp_min) {
+	if (*significand == 0 && *exponent == efloat32_r2_exp_min) {
 		/* zero or -zero */
 		return ef_zero;
 	}
 
-	if (*exponent == efloat32_le_r2_exp_min) {
+	if (*exponent == efloat32_r2_exp_min) {
 		/* subnormal */
 		return ef_subnorm;
 	}
@@ -175,20 +175,20 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 	err = 0;
 	s2 = sign ? 1 : 0;
 
-	if (exponent > efloat32_le_r2_exp_inf_nan
-	    || exponent < efloat32_le_r2_exp_min) {
+	if (exponent > efloat32_r2_exp_inf_nan
+	    || exponent < efloat32_r2_exp_min) {
 		err = 1;
-		exponent = efloat32_le_r2_exp_inf_nan;
+		exponent = efloat32_r2_exp_inf_nan;
 	}
-	raw_exp = (exponent + efloat32_le_r2_exp_max);
+	raw_exp = (exponent + efloat32_r2_exp_max);
 
-	if (significand != (significand & efloat32_le_r2_signif_mask)) {
+	if (significand != (significand & efloat32_r2_signif_mask)) {
 		err = 1;
-		significand = (significand & efloat32_le_r2_signif_mask);
+		significand = (significand & efloat32_r2_signif_mask);
 	}
 
-	u32 = (sign ? efloat32_le_r2_sign_mask : 0)
-	    | (raw_exp << efloat32_le_r2_exp_shift)
+	u32 = (sign ? efloat32_r2_sign_mask : 0)
+	    | (raw_exp << efloat32_r2_exp_shift)
 	    | significand;
 
 	f = uint32_to_efloat32(u32);
@@ -309,15 +309,15 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 
 	u64 = efloat64_to_uint64(f);
 
-	*sign = (u64 & efloat64_le_r2_sign_mask) ? 1U : 0U;
+	*sign = (u64 & efloat64_r2_sign_mask) ? 1U : 0U;
 
-	raw_exp = (u64 & efloat64_le_r2_rexp_mask);
-	raw_exp = (raw_exp >> efloat64_le_r2_exp_shift);
-	*exponent = (raw_exp - efloat64_le_r2_exp_max);
+	raw_exp = (u64 & efloat64_r2_rexp_mask);
+	raw_exp = (raw_exp >> efloat64_r2_exp_shift);
+	*exponent = (raw_exp - efloat64_r2_exp_max);
 
-	*significand = u64 & efloat64_le_r2_signif_mask;
+	*significand = u64 & efloat64_r2_signif_mask;
 
-	if (*exponent == efloat64_le_r2_exp_inf_nan) {
+	if (*exponent == efloat64_r2_exp_inf_nan) {
 		if (*significand) {
 			/* +/- nan */
 			return ef_nan;
@@ -327,12 +327,12 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 		}
 	}
 
-	if (*significand == 0 && *exponent == efloat64_le_r2_exp_min) {
+	if (*significand == 0 && *exponent == efloat64_r2_exp_min) {
 		/* zero or -zero */
 		return ef_zero;
 	}
 
-	if (*exponent == efloat64_le_r2_exp_min) {
+	if (*exponent == efloat64_r2_exp_min) {
 		/* subnormal */
 		return ef_subnorm;
 	}
@@ -355,20 +355,20 @@ efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 	err = 0;
 	s2 = sign ? 1 : 0;
 
-	if (exponent > efloat64_le_r2_exp_inf_nan
-	    || exponent < efloat64_le_r2_exp_min) {
+	if (exponent > efloat64_r2_exp_inf_nan
+	    || exponent < efloat64_r2_exp_min) {
 		err = 1;
-		exponent = efloat64_le_r2_exp_inf_nan;
+		exponent = efloat64_r2_exp_inf_nan;
 	}
-	raw_exp = (exponent + efloat64_le_r2_exp_max);
+	raw_exp = (exponent + efloat64_r2_exp_max);
 
-	if (significand != (significand & efloat64_le_r2_signif_mask)) {
+	if (significand != (significand & efloat64_r2_signif_mask)) {
 		err = 1;
-		significand = (significand & efloat64_le_r2_signif_mask);
+		significand = (significand & efloat64_r2_signif_mask);
 	}
 
-	u64 = (sign ? efloat64_le_r2_sign_mask : 0)
-	    | (raw_exp << efloat64_le_r2_exp_shift)
+	u64 = (sign ? efloat64_r2_sign_mask : 0)
+	    | (raw_exp << efloat64_r2_exp_shift)
 	    | significand;
 
 	f = uint64_to_efloat64(u64);
