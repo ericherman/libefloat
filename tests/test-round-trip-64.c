@@ -1,5 +1,5 @@
 /*
-test-round-trip.c: quick test for the Embedable Float manipulation library
+test-round-trip-64.c: quick test for the Embedable Float manipulation library
 Copyright (C) 2017 Eric Herman
 
 https://github.com/ericherman/libefloat
