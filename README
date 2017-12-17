@@ -1,5 +1,97 @@
 efloat: Embedable Float manipulation library
 
+The goal of this library is to provide functions which can be added
+to embedded projects, especially those which wish to transfer
+floating point data without paying the cost of string conversion.
+Not all platforms have 32 and 64 bit floats, thus the library tries
+to be resilient to this. For example all of "float", "double" and
+"long double" types on the "avr" platform are 32 bits, there is no
+"float64" when building for avr, only "float32".
+
+Assuming IEEE 754 (radix 2), transforming the exponent is a bit tricky, but
+the bit layout is straight-forward:
+
+float32 Sign	Exponent	Significand (mantissa)
+float32 1 [31]	8 [30-23]	23 [22-00]
+float32 SEEEEEEE EMMMMMMM MMMMMMMM MMMMMMMM
+https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+
+float64 Sign	Exponent	Significand (mantissa)
+float64 1 [63]	11 [62-52]	52 [51-00]
+float64 SEEEEEEE EEEEMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM
+https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+
+
+Overview
+--------
+
+Before including efloat.h, ensure that stdint.h compatible typedefs
+for fixed width integers have been declared, and the following
+float.h vales are defined:
+
+ * FLT_RADIX (at this time only FLT_RADIX == 2 is supported)
+ * FLT_MAX_EXP
+ * FLT_MANT_DIG
+ * DBL_MAX_EXP
+ * DBL_MANT_DIG
+ * LDBL_MAX_EXP
+ * LDBL_MANT_DIG
+
+#include <efloat.h>
+
+ * If "float", "double", or "long double" are either 32 or 64 bits,
+   the values "efloat_float", "efloat_double", and/or "efloat_long_double"
+   will be #defined to be either 32 or 64.
+
+ * Headder attempts to typedef two types: "efloat32" and "efloat64", and
+   will #define "efloat32_exists" and "efloat64_exists" accordingly.
+
+ * For each of these types, the header will declare functions to convert
+   between integer and floating point types, for easier (de)serialization:
+
+	efloat64 int64_to_efloat64(int64_t i)
+	efloat64 uint64_to_efloat64(uint64_t i)
+	uint64_t efloat64_to_uint64(efloat64 f)
+	int64_t efloat64_to_int64(efloat64 f)
+
+ * Additionally, an equivilent to the "fpclassify" function from math.h
+   is provided:
+	enum efloat_class {
+		ef_nan = 0,
+		ef_inf = 1,
+		ef_zero = 2,
+		ef_subnorm = 3,
+		ef_normal = 4
+	};
+	enum efloat_class efloat64_classify(efloat64 f)
+   The enum efloat_class values are mapped to the same values as math.h.
+
+ * Functions for extracting infromation from the float are provided:
+
+	enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
+	                                             uint8_t *sign,
+	                                             int16_t *exponent,
+	                                             uint64_t *significand)
+
+	efloat64 efloat64_radix_2_from_fields(uint8_t sign,
+	                                      int16_t exponent,
+	                                      uint64_t significand,
+	                                      enum efloat_class *efloat64class)
+
+
+Usage
+-----
+
+The "tests" directory contains an example usage which shows round trip
+conversion between integer and floating point types, as well as comparing
+to the host platform's math.h version of fpclassify.
+
+
+Building
+--------
+The included Makefile shows an exaple; try "make check"
+
+
 License
 -------
 This work is free software; you can redistribute it and/or
