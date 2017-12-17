@@ -112,18 +112,18 @@ enum efloat_class efloat32_classify(efloat32 f)
 {
 	uint8_t sign;
 	int16_t exp;
-	uint32_t frac;
+	uint32_t signif;
 
 	sign = 0;
 	exp = 0;
-	frac = 0;
-	return efloat32_radix_2_to_fields(f, &sign, &exp, &frac);
+	signif = 0;
+	return efloat32_radix_2_to_fields(f, &sign, &exp, &signif);
 }
 
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint32_t *fraction)
+					     uint32_t *significand)
 {
 	uint32_t u32, raw_exp;
 
@@ -135,10 +135,10 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 	raw_exp = (raw_exp >> efloat32_le_r2_exp_shift);
 	*exponent = (raw_exp - efloat32_le_r2_exp_max);
 
-	*fraction = u32 & efloat32_le_r2_frac_mask;
+	*significand = u32 & efloat32_le_r2_signif_mask;
 
 	if (*exponent == efloat32_le_r2_exp_inf_nan) {
-		if (*fraction) {
+		if (*significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -147,7 +147,7 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 		}
 	}
 
-	if (*fraction == 0 && *exponent == efloat32_le_r2_exp_min) {
+	if (*significand == 0 && *exponent == efloat32_le_r2_exp_min) {
 		/* zero or -zero */
 		return ef_zero;
 	}
@@ -162,14 +162,14 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 
 efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint32_t fraction,
+				      uint32_t significand,
 				      enum efloat_class *efloat32class)
 {
 	efloat32 f;
 	uint32_t u32, raw_exp;
 	int16_t exp2;
 	uint8_t s2;
-	uint32_t frac2;
+	uint32_t signif2;
 	int err;
 
 	err = 0;
@@ -182,21 +182,21 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 	}
 	raw_exp = (exponent + efloat32_le_r2_exp_max);
 
-	if (fraction != (fraction & efloat32_le_r2_frac_mask)) {
+	if (significand != (significand & efloat32_le_r2_signif_mask)) {
 		err = 1;
-		fraction = (fraction & efloat32_le_r2_frac_mask);
+		significand = (significand & efloat32_le_r2_signif_mask);
 	}
 
 	u32 = (sign ? efloat32_le_r2_sign_mask : 0)
 	    | (raw_exp << efloat32_le_r2_exp_shift)
-	    | fraction;
+	    | significand;
 
 	f = uint32_to_efloat32(u32);
 	if (efloat32class) {
 		*efloat32class =
-		    efloat32_radix_2_to_fields(f, &s2, &exp2, &frac2);
+		    efloat32_radix_2_to_fields(f, &s2, &exp2, &signif2);
 	} else {
-		efloat32_radix_2_to_fields(f, &s2, &exp2, &frac2);
+		efloat32_radix_2_to_fields(f, &s2, &exp2, &signif2);
 	}
 	if (!err) {
 		if ((!sign) != (!s2)) {
@@ -207,9 +207,10 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 			eprintf2("exponent %d != %d\n", (int)exponent,
 				 (int)exp2);
 		}
-		if (fraction != frac2) {
-			eprintf2("fraction %lu != %lu\n",
-				 (unsigned long)fraction, (unsigned long)frac2);
+		if (significand != signif2) {
+			eprintf2("significand %lu != %lu\n",
+				 (unsigned long)significand,
+				 (unsigned long)signif2);
 		}
 	}
 	return f;
@@ -291,18 +292,18 @@ enum efloat_class efloat64_classify(efloat64 f)
 {
 	uint8_t sign;
 	int16_t exp;
-	uint64_t frac;
+	uint64_t signif;
 
 	sign = 0;
 	exp = 0;
-	frac = 0;
-	return efloat64_radix_2_to_fields(f, &sign, &exp, &frac);
+	signif = 0;
+	return efloat64_radix_2_to_fields(f, &sign, &exp, &signif);
 }
 
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint64_t *fraction)
+					     uint64_t *significand)
 {
 	uint64_t u64, raw_exp;
 
@@ -314,10 +315,10 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 	raw_exp = (raw_exp >> efloat64_le_r2_exp_shift);
 	*exponent = (raw_exp - efloat64_le_r2_exp_max);
 
-	*fraction = u64 & efloat64_le_r2_frac_mask;
+	*significand = u64 & efloat64_le_r2_signif_mask;
 
 	if (*exponent == efloat64_le_r2_exp_inf_nan) {
-		if (*fraction) {
+		if (*significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -326,7 +327,7 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 		}
 	}
 
-	if (*fraction == 0 && *exponent == efloat64_le_r2_exp_min) {
+	if (*significand == 0 && *exponent == efloat64_le_r2_exp_min) {
 		/* zero or -zero */
 		return ef_zero;
 	}
@@ -341,14 +342,14 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 
 efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint64_t fraction,
+				      uint64_t significand,
 				      enum efloat_class *efloat64class)
 {
 	efloat64 f;
 	uint64_t u64, raw_exp;
 	int16_t exp2;
 	uint8_t s2;
-	uint64_t frac2;
+	uint64_t signif2;
 	int err;
 
 	err = 0;
@@ -361,21 +362,21 @@ efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 	}
 	raw_exp = (exponent + efloat64_le_r2_exp_max);
 
-	if (fraction != (fraction & efloat64_le_r2_frac_mask)) {
+	if (significand != (significand & efloat64_le_r2_signif_mask)) {
 		err = 1;
-		fraction = (fraction & efloat64_le_r2_frac_mask);
+		significand = (significand & efloat64_le_r2_signif_mask);
 	}
 
 	u64 = (sign ? efloat64_le_r2_sign_mask : 0)
 	    | (raw_exp << efloat64_le_r2_exp_shift)
-	    | fraction;
+	    | significand;
 
 	f = uint64_to_efloat64(u64);
 	if (efloat64class) {
 		*efloat64class =
-		    efloat64_radix_2_to_fields(f, &s2, &exp2, &frac2);
+		    efloat64_radix_2_to_fields(f, &s2, &exp2, &signif2);
 	} else {
-		efloat64_radix_2_to_fields(f, &s2, &exp2, &frac2);
+		efloat64_radix_2_to_fields(f, &s2, &exp2, &signif2);
 	}
 	if (!err) {
 		if ((!sign) != (!s2)) {
@@ -386,9 +387,10 @@ efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 			eprintf2("exponent %d != %d\n", (int)exponent,
 				 (int)exp2);
 		}
-		if (fraction != frac2) {
-			eprintf2("fraction %lu != %lu\n",
-				 (unsigned long)fraction, (unsigned long)frac2);
+		if (significand != signif2) {
+			eprintf2("significand %lu != %lu\n",
+				 (unsigned long)significand,
+				 (unsigned long)signif2);
 		}
 	}
 	return f;

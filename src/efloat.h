@@ -15,14 +15,14 @@ version.
 Assuming IEEE 754 (radix 2), transforming the exponent is a bit tricky, but
 the bit layout is straight-forward:
 
-float32 Sign	Exponent	Fraction
+float32 Sign	Exponent	Significand (mantissa)
 float32 1 [31]	8 [30-23]	23 [22-00]
-float32 SEEEEEEE EFFFFFFF FFFFFFFF FFFFFFFF
+float32 SEEEEEEE EMMMMMMM MMMMMMMM MMMMMMMM
 https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 
-float64 Sign	Exponent	Fraction
+float64 Sign	Exponent	Significand (mantissa)
 float64 1 [63]	11 [62-52]	52 [51-00]
-float64 SEEEEEEE EEEEFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
+float64 SEEEEEEE EEEEMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM
 https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 */
 
@@ -137,7 +137,7 @@ enum efloat_class {
 #define efloat32_le_r2_exp_inf_nan 128
 #define efloat32_le_r2_sign_mask 0x80000000UL
 #define efloat32_le_r2_rexp_mask 0x7F800000UL
-#define efloat32_le_r2_frac_mask 0x007FFFFFUL
+#define efloat32_le_r2_signif_mask 0x007FFFFFUL
 #define efloat32_le_r2_exp_shift 23
 #endif
 
@@ -148,7 +148,7 @@ enum efloat_class {
 #define efloat64_le_r2_exp_inf_nan 1024L
 #define efloat64_le_r2_sign_mask 0x8000000000000000UL
 #define efloat64_le_r2_rexp_mask 0x7FF0000000000000UL
-#define efloat64_le_r2_frac_mask 0x000FFFFFFFFFFFFFUL
+#define efloat64_le_r2_signif_mask 0x000FFFFFFFFFFFFFUL
 #define efloat64_le_r2_exp_shift 52
 #endif
 
@@ -159,7 +159,7 @@ enum efloat_class {
 #define efloat64_le_r2_exp_inf_nan 1024L
 #define efloat64_le_r2_sign_mask 0x8000000000000000ULL
 #define efloat64_le_r2_rexp_mask 0x7FF0000000000000ULL
-#define efloat64_le_r2_frac_mask 0x000FFFFFFFFFFFFFULL
+#define efloat64_le_r2_signif_mask 0x000FFFFFFFFFFFFFULL
 #define efloat64_le_r2_exp_shift 52
 #endif
 
@@ -172,10 +172,10 @@ enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint32_t *fraction);
+					     uint32_t *significand);
 efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint32_t fraction,
+				      uint32_t significand,
 				      enum efloat_class *efloat32class);
 #endif
 
@@ -188,10 +188,10 @@ enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint64_t *fraction);
+					     uint64_t *significand);
 efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint64_t fraction,
+				      uint64_t significand,
 				      enum efloat_class *efloat64class);
 #endif
 

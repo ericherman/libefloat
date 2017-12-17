@@ -21,30 +21,30 @@ unsigned round_trip64(efloat64 f)
 	efloat64 f2;
 	uint8_t sign, s2;
 	int16_t exponent, exp2;
-	uint64_t fraction, frac2;
+	uint64_t significand, signif2;
 
 	enum efloat_class cls, cls2;
 
-	cls = efloat64_radix_2_to_fields(f, &sign, &exponent, &fraction);
+	cls = efloat64_radix_2_to_fields(f, &sign, &exponent, &significand);
 	if (cls != fpclassify(f)) {
 		fprintf(stderr, "cls %d != fpclassify (%d)\n", cls,
 			fpclassify(f));
 		return 1;
 	}
 
-	f2 = efloat64_radix_2_from_fields(sign, exponent, fraction, &cls2);
+	f2 = efloat64_radix_2_from_fields(sign, exponent, significand, &cls2);
 	if (efloat64_to_uint64(f2) == efloat64_to_uint64(f)) {
 		return 0;
 	}
 
-	efloat64_radix_2_to_fields(f2, &s2, &exp2, &frac2);
+	efloat64_radix_2_to_fields(f2, &s2, &exp2, &signif2);
 	fprintf(stderr, "%g (%lu) != %g (%lu)\n", f2,
 		(unsigned long)efloat64_to_uint64(f2), f,
 		(unsigned long)efloat64_to_uint64(f));
-	fprintf(stderr, "float: %g, sign: %u, exp: %d frac: %lu\n", f,
-		sign, exponent, fraction);
-	fprintf(stderr, "float: %g, sign: %u, exp: %d frac: %lu\n", f2,
-		s2, exp2, frac2);
+	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %lu\n", f,
+		sign, exponent, significand);
+	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %lu\n", f2,
+		s2, exp2, signif2);
 	if (cls2 != cls) {
 		fprintf(stderr, "cls %d != %d\n", cls2, cls);
 	}
