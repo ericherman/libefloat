@@ -82,9 +82,9 @@ float.h vales are defined:
 Usage
 -----
 
-The "tests" directory contains an example usage which shows round trip
-conversion between integer and floating point types, as well as comparing
-to the host platform's math.h version of fpclassify.
+The "tests" directory contains examples which shows round trip conversion
+between integer and floating point types, as well as comparing to the host
+platform's math.h version of fpclassify.
 
 
 Building

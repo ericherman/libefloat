@@ -1,20 +1,39 @@
-check: check-test-round-trip-64
+CC=gcc
+CFLAGS=-std=gnu89 -pedantic \
+ -g -O2 -fomit-frame-pointer \
+ -Wall -Wextra -Werror -Wno-long-long \
+ -DHAVE_STDINT_H=1 \
+ -DHAVE_FLOAT_H=1 \
+ -DHAVE_LIMITS_H=1 \
+ -DHAVE_STDIO_H=1 \
+ -I./src
+LD_ADD=-lm
+
+check: check-test-round-trip-64 check-test-round-trip-32
 
 test-round-trip-64:
-	gcc -std=gnu89 -pedantic \
-		-g -O2 -fomit-frame-pointer \
-		-Wall -Wextra -Werror -Wno-long-long \
-		-DHAVE_STDINT_H=1 \
-		-DHAVE_FLOAT_H=1 \
-		-DHAVE_LIMITS_H=1 \
-		-DHAVE_STDIO_H=1 \
-		-I./src \
+	$(CC) $(CFLAGS) \
 		-o ./test-round-trip-64 \
-		./src/efloat.c ./tests/test-round-trip-64.c \
-		-lm
+		./src/efloat.c \
+		./tests/test-round-trip-64.c \
+		$(LD_ADD)
 
 check-test-round-trip-64: test-round-trip-64
 	./test-round-trip-64
+
+test-round-trip-32:
+	$(CC) $(CFLAGS) \
+		-o ./test-round-trip-32 \
+		./src/efloat.c \
+		./tests/test-round-trip-32.c \
+		$(LD_ADD)
+
+check-test-round-trip-32: test-round-trip-32
+	./test-round-trip-32
+
+# this will check all 32bit values for round-trip success
+check-32-exhaustive: test-round-trip-32
+	./test-round-trip-32 1 1
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0

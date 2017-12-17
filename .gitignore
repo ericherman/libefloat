@@ -1,4 +1,5 @@
-test-round-trip
+test-round-trip-64
+test-round-trip-32
 
 ###################
 # backup files
