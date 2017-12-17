@@ -33,7 +33,7 @@ version.
    The C standard reads ambuguously to me as to whether this is strictly
    conforming, but I know of no compilers which do not support it.
 
-   The use of memcpy() here is probably going to be removed:
+   The calls to memcpy() here are probably going to be removed by gcc:
    gcc output: https://godbolt.org/g/hiX8oL
 */
 
