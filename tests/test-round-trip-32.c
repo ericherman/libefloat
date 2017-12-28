@@ -4,7 +4,7 @@ Copyright (C) 2017 Eric Herman
 
 https://github.com/ericherman/libefloat
 
-This library is free software; you can redistribute it and/or
+This work is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later
@@ -118,7 +118,8 @@ int int32_efloat32_round_trip(int32_t i)
 
 int main(int argc, char **argv)
 {
-	int32_t i, step, limit;
+	uint32_t i, step, limit;
+	int32_t val;
 	int64_t err, cnt;
 	int verbose;
 
@@ -134,7 +135,7 @@ int main(int argc, char **argv)
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
 	if (step <= 0) {
-		step = (INT32_MAX / (32 * 1024));
+		step = (INT32_MAX / (128 * 1024));
 	}
 	limit = (INT32_MAX / step);
 
@@ -169,13 +170,14 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < limit; ++i) {
 		++cnt;
-		err += int32_efloat32_round_trip(i * step);
+		val = (int32_t)(i * step);
+		err += int32_efloat32_round_trip(val);
 		if (err) {
 			return 1;
 		}
 
 		++cnt;
-		err += int32_efloat32_round_trip(-(i * step));
+		err += int32_efloat32_round_trip(-val);
 		if (err) {
 			return 1;
 		}

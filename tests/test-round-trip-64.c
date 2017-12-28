@@ -4,7 +4,7 @@ Copyright (C) 2017 Eric Herman
 
 https://github.com/ericherman/libefloat
 
-This library is free software; you can redistribute it and/or
+This work is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later
@@ -118,7 +118,8 @@ int int64_efloat64_round_trip(int64_t i)
 
 int main(int argc, char **argv)
 {
-	int64_t i, step, limit;
+	uint64_t i, step, limit;
+	int64_t val;
 	int64_t err, cnt;
 	int verbose;
 
@@ -169,13 +170,14 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < limit; ++i) {
 		++cnt;
-		err += int64_efloat64_round_trip(i * step);
+		val = (int64_t)(i * step);
+		err += int64_efloat64_round_trip(val);
 		if (err) {
 			return 1;
 		}
 
 		++cnt;
-		err += int64_efloat64_round_trip(-(i * step));
+		err += int64_efloat64_round_trip(-val);
 		if (err) {
 			return 1;
 		}
