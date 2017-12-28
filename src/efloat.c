@@ -39,13 +39,6 @@ version.
 
 #if ((defined efloat32_exists) && (efloat32_exists))
 #if HAVE_MEMCPY
-efloat32 int32_to_efloat32(int32_t i)
-{
-	efloat32 f;
-	memcpy(&f, &i, sizeof(efloat32));
-	return f;
-}
-
 efloat32 uint32_to_efloat32(uint32_t u)
 {
 	efloat32 f;
@@ -60,22 +53,22 @@ uint32_t efloat32_to_uint32(efloat32 f)
 	return u;
 }
 
+#if ((defined efloat32_also_signed_ints) && (efloat32_also_signed_ints))
+efloat32 int32_to_efloat32(int32_t i)
+{
+	efloat32 f;
+	memcpy(&f, &i, sizeof(efloat32));
+	return f;
+}
+
 int32_t efloat32_to_int32(efloat32 f)
 {
 	int32_t i;
 	memcpy(&i, &f, sizeof(int32_t));
 	return i;
 }
-#else
-efloat32 int32_to_efloat32(int32_t i)
-{
-	union efloat32_u {
-		efloat32 f;
-		int32_t i;
-	} pun;
-	pun.i = i;
-	return pun.f;
-}
+#endif /* efloat32_also_signed_ints */
+#else /* HAVE_MEMCPY */
 
 efloat32 uint32_to_efloat32(uint32_t u)
 {
@@ -97,6 +90,17 @@ uint32_t efloat32_to_uint32(efloat32 f)
 	return pun.u;
 }
 
+#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+efloat32 int32_to_efloat32(int32_t i)
+{
+	union efloat32_u {
+		efloat32 f;
+		int32_t i;
+	} pun;
+	pun.i = i;
+	return pun.f;
+}
+
 int32_t efloat32_to_int32(efloat32 f)
 {
 	union efloat32_u {
@@ -106,7 +110,8 @@ int32_t efloat32_to_int32(efloat32 f)
 	pun.f = f;
 	return pun.i;
 }
-#endif
+#endif /* efloat64_also_signed_ints */
+#endif /* HAVE_MEMCPY */
 
 enum efloat_class efloat32_classify(efloat32 f)
 {
@@ -219,13 +224,6 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 
 #if ((defined efloat64_exists) && (efloat64_exists))
 #if HAVE_MEMCPY
-efloat64 int64_to_efloat64(int64_t i)
-{
-	efloat64 f;
-	memcpy(&f, &i, sizeof(efloat64));
-	return f;
-}
-
 efloat64 uint64_to_efloat64(uint64_t u)
 {
 	efloat64 f;
@@ -240,23 +238,22 @@ uint64_t efloat64_to_uint64(efloat64 f)
 	return u;
 }
 
+#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+efloat64 int64_to_efloat64(int64_t i)
+{
+	efloat64 f;
+	memcpy(&f, &i, sizeof(efloat64));
+	return f;
+}
+
 int64_t efloat64_to_int64(efloat64 f)
 {
 	int64_t i;
 	memcpy(&i, &f, sizeof(int64_t));
 	return i;
 }
-#else
-efloat64 int64_to_efloat64(int64_t i)
-{
-	union efloat64_u {
-		efloat64 f;
-		int64_t i;
-	} pun;
-	pun.i = i;
-	return pun.f;
-}
-
+#endif /* efloat64_also_signed_ints */
+#else /* HAVE MEMCPY */
 efloat64 uint64_to_efloat64(uint64_t u)
 {
 	union efloat64_u {
@@ -277,6 +274,17 @@ uint64_t efloat64_to_uint64(efloat64 f)
 	return pun.u;
 }
 
+#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+efloat64 int64_to_efloat64(int64_t i)
+{
+	union efloat64_u {
+		efloat64 f;
+		int64_t i;
+	} pun;
+	pun.i = i;
+	return pun.f;
+}
+
 int64_t efloat64_to_int64(efloat64 f)
 {
 	union efloat64_u {
@@ -286,7 +294,8 @@ int64_t efloat64_to_int64(efloat64 f)
 	pun.f = f;
 	return pun.i;
 }
-#endif
+#endif /* efloat64_also_signed_ints */
+#endif /* HAVE_MEMCPY */
 
 enum efloat_class efloat64_classify(efloat64 f)
 {

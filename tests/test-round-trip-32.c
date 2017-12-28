@@ -16,7 +16,7 @@ version.
 #include <stdlib.h>
 #include <math.h>
 
-unsigned round_trip32(efloat32 f)
+unsigned efloat32_round_trip(efloat32 f)
 {
 	efloat32 f2;
 	uint8_t sign, s2;
@@ -38,13 +38,13 @@ unsigned round_trip32(efloat32 f)
 	}
 
 	efloat32_radix_2_to_fields(f2, &s2, &exp2, &signif2);
-	fprintf(stderr, "%g (%lu) != %g (%lu)\n", f2,
-		(unsigned long)efloat32_to_uint32(f2), f,
-		(unsigned long)efloat32_to_uint32(f));
-	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %lu\n", f,
-		sign, exponent, (unsigned long)significand);
-	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %lu\n", f2,
-		s2, exp2, (unsigned long)signif2);
+	fprintf(stderr, "%g (%llu) != %g (%llu)\n",
+		f2, (unsigned long long)efloat32_to_uint32(f2),
+		f, (unsigned long long)efloat32_to_uint32(f));
+	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f,
+		sign, exponent, (unsigned long long)significand);
+	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f2,
+		s2, exp2, (unsigned long long)signif2);
 	if (cls2 != cls) {
 		fprintf(stderr, "cls %d != %d\n", cls2, cls);
 	}
@@ -52,16 +52,81 @@ unsigned round_trip32(efloat32 f)
 	return 1;
 }
 
+int uint32_efloat32_round_trip(uint32_t u)
+{
+	int err;
+	uint32_t u2;
+	efloat32 f;
+
+	f = uint32_to_efloat32(u);
+	err = efloat32_round_trip(f);
+	if (err) {
+		return 1;
+	}
+	u2 = efloat32_to_uint32(f);
+
+	if (u != u2) {
+		fprintf(stderr,
+			"%llu fails uint-float-uint round trip as:\n%llu\n",
+			(unsigned long long)u, (unsigned long long)u2);
+		fprintf(stderr,
+			"0x%0llX fails uint-float-uint round trip as:\n0x%0llX\n",
+			(unsigned long long)u, (unsigned long long)u2);
+		return 1;
+	}
+
+	return 0;
+}
+
+#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+int int32_efloat32_round_trip(int32_t i)
+{
+	int err;
+	int32_t i2;
+	efloat32 f;
+
+	f = int32_to_efloat32(i);
+	err = efloat32_round_trip(f);
+	if (err) {
+		return 1;
+	}
+
+	i2 = efloat32_to_int32(f);
+
+	if (i != i2) {
+		fprintf(stderr,
+			"%lld fails int-float-int round trip as:\n%lld\n",
+			(long long)i, (long long)i2);
+		fprintf(stderr,
+			"0x%0llX fails int-float-int round trip as:\n0x%0llX\n",
+			(long long)i, (long long)i2);
+		return 1;
+	}
+
+	return 0;
+}
+#else
+int int32_efloat32_round_trip(int32_t i)
+{
+	uint32_t u;
+
+	u = (i < 0) ? ((UINT32_MAX) - ((uint32_t)(-i))) : ((uint32_t)i);
+
+	return uint32_efloat32_round_trip(u);
+}
+#endif
+
 int main(int argc, char **argv)
 {
-	int32_t i, step;
-	efloat32 f;
+	int32_t i, step, limit;
 	int64_t err, cnt;
 	int verbose;
 
 	if (sizeof(efloat32) != sizeof(int32_t)) {
-		fprintf(stderr, "sizeof(efloat32) %d != sizeof(int32_t) %d!\n",
-			sizeof(efloat32), sizeof(int32_t));
+		fprintf(stderr,
+			"sizeof(efloat32) %lu != sizeof(int32_t) %lu!\n",
+			(unsigned long)sizeof(efloat32),
+			(unsigned long)sizeof(int32_t));
 		return EXIT_FAILURE;
 	}
 
@@ -69,46 +134,49 @@ int main(int argc, char **argv)
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
 	if (step <= 0) {
-		step = 63;
+		step = (INT32_MAX / (32 * 1024));
 	}
+	limit = (INT32_MAX / step);
 
 	cnt = 0;
 	err = 0;
-	err += round_trip32(0.0);
+	err += efloat32_round_trip(0.0);
 
-	err += round_trip32(uint32_to_efloat32(0));
-	err += round_trip32(uint32_to_efloat32(UINT32_MAX));
+	err += uint32_efloat32_round_trip(0);
+	err += uint32_efloat32_round_trip(UINT32_MAX);
 
-	err += round_trip32(int32_to_efloat32(-1));
-	err += round_trip32(int32_to_efloat32(INT32_MAX));
-	err += round_trip32(int32_to_efloat32(-INT32_MAX));
-	err += round_trip32(int32_to_efloat32(INT32_MIN));
+	err += int32_efloat32_round_trip(-1);
+	err += uint32_efloat32_round_trip((uint32_t)-1);
 
-	err += round_trip32(FLT_MAX);
-	err += round_trip32(-FLT_MAX);
-	err += round_trip32(FLT_MIN);
-	err += round_trip32(-FLT_MIN);
+	err += int32_efloat32_round_trip(INT32_MAX);
+	err += uint32_efloat32_round_trip((uint32_t)INT32_MAX);
 
-	cnt = 11;
+	err += int32_efloat32_round_trip(-INT32_MAX);
+	err += uint32_efloat32_round_trip((uint32_t)-INT32_MAX);
 
-	for (i = 0; i >= 0 && i < INT32_MAX; i += step) {
+	err += int32_efloat32_round_trip(INT32_MIN);
+	err += uint32_efloat32_round_trip((uint32_t)INT32_MIN);
+
+	err += efloat32_round_trip(FLT_MAX);
+	err += efloat32_round_trip(-FLT_MAX);
+	err += efloat32_round_trip(FLT_MIN);
+	err += efloat32_round_trip(-FLT_MIN);
+
+	cnt = 15;
+	if (err) {
+		return 1;
+	}
+
+	for (i = 0; i < limit; ++i) {
 		++cnt;
-		f = int32_to_efloat32(i);
-		if (i == efloat32_to_int32(f)) {
-			err += round_trip32(f);
-		} else {
-			fprintf(stderr,
-				"%ld fails int-float-int round trip as %ld\n",
-				(long)i, (long)efloat32_to_int32(f));
+		err += int32_efloat32_round_trip(i * step);
+		if (err) {
 			return 1;
 		}
-		f = int32_to_efloat32(-i);
-		if (-i == efloat32_to_int32(f)) {
-			err += round_trip32(f);
-		} else {
-			fprintf(stderr,
-				"%ld fails int-float-int round trip as %ld\n",
-				(long)-i, (long)efloat32_to_int32(f));
+
+		++cnt;
+		err += int32_efloat32_round_trip(-(i * step));
+		if (err) {
 			return 1;
 		}
 	}

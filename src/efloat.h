@@ -164,10 +164,12 @@ enum efloat_class {
 #endif
 
 #if ((defined efloat32_exists) && (efloat32_exists))
-efloat32 int32_to_efloat32(int32_t i);
 efloat32 uint32_to_efloat32(uint32_t i);
 uint32_t efloat32_to_uint32(efloat32 f);
+#if ((defined efloat32_also_signed_ints) && (efloat32_also_signed_ints))
+efloat32 int32_to_efloat32(int32_t i);
 int32_t efloat32_to_int32(efloat32 f);
+#endif
 enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     uint8_t *sign,
@@ -180,10 +182,12 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists))
-efloat64 int64_to_efloat64(int64_t i);
 efloat64 uint64_to_efloat64(uint64_t i);
 uint64_t efloat64_to_uint64(efloat64 f);
+#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+efloat64 int64_to_efloat64(int64_t i);
 int64_t efloat64_to_int64(efloat64 f);
+#endif /* efloat64_also_signed_ints */
 enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     uint8_t *sign,
