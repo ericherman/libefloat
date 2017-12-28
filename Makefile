@@ -131,7 +131,7 @@ check-32: check-32-static check-32-dynamic
 
 # this will check all 32bit values for round-trip success
 check-32-exhaustive: $(TEST_32_EXE)-static
-	time $(TEST_32_EXE)-static 1 1
+	time ./$(TEST_32_EXE)-static 1 1
 
 $(TEST_64_OBJ): $(EFLT_LIB_HDR) $(TEST_64_SRC)
 	$(CC) -c $(TEST_CFLAGS) $(TEST_64_SRC) -o $(TEST_64_OBJ)
