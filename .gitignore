@@ -1,5 +1,7 @@
-test-round-trip-64
-test-round-trip-32
+test-round-trip-32-dynamic
+test-round-trip-32-static
+test-round-trip-64-dynamic
+test-round-trip-64-static
 
 ###################
 # backup files
