@@ -158,10 +158,10 @@ int main(int argc, char **argv)
 	err += int64_efloat64_round_trip(INT64_MIN);
 	err += uint64_efloat64_round_trip((uint64_t)INT64_MIN);
 
-	err += efloat64_round_trip(FLT_MAX);
-	err += efloat64_round_trip(-FLT_MAX);
-	err += efloat64_round_trip(FLT_MIN);
-	err += efloat64_round_trip(-FLT_MIN);
+	err += efloat64_round_trip(DBL_MAX);
+	err += efloat64_round_trip(-DBL_MAX);
+	err += efloat64_round_trip(DBL_MIN);
+	err += efloat64_round_trip(-DBL_MIN);
 
 	cnt = 15;
 	if (err) {
