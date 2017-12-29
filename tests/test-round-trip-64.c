@@ -161,8 +161,18 @@ int main(int argc, char **argv)
 	err += efloat64_round_trip(-DBL_MAX);
 	err += efloat64_round_trip(DBL_MIN);
 	err += efloat64_round_trip(-DBL_MIN);
+	err += efloat64_round_trip((efloat64)0.0f);
+	err += efloat64_round_trip((efloat64)-0.0f);
+	err += efloat64_round_trip((efloat64)(0.0f / 0.0f));	/* NAN */
+	cnt = 18;
 
-	cnt = 15;
+#ifdef INFINITY
+	err += efloat64_round_trip((efloat64)INFINITY);
+	++cnt;
+	err += efloat64_round_trip((efloat64)-INFINITY);
+	++cnt;
+#endif
+
 	if (err) {
 		return 1;
 	}
