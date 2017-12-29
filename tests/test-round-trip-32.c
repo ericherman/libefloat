@@ -57,7 +57,6 @@ int uint32_efloat32_round_trip(uint32_t u)
 	int err;
 	uint32_t u2;
 	efloat32 f;
-
 	f = uint32_to_efloat32(u);
 	err = efloat32_round_trip(f);
 	if (err) {
@@ -65,7 +64,7 @@ int uint32_efloat32_round_trip(uint32_t u)
 	}
 	u2 = efloat32_to_uint32(f);
 
-	if (u != u2) {
+	if ((FP_NAN != fpclassify(f)) && (u != u2)) {
 		fprintf(stderr,
 			"%llu fails uint-float-uint round trip as:\n%llu\n",
 			(unsigned long long)u, (unsigned long long)u2);

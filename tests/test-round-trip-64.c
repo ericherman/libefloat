@@ -57,7 +57,6 @@ int uint64_efloat64_round_trip(uint64_t u)
 	int err;
 	uint64_t u2;
 	efloat64 f;
-
 	f = uint64_to_efloat64(u);
 	err = efloat64_round_trip(f);
 	if (err) {
@@ -65,7 +64,7 @@ int uint64_efloat64_round_trip(uint64_t u)
 	}
 	u2 = efloat64_to_uint64(f);
 
-	if (u != u2) {
+	if ((FP_NAN != fpclassify(f)) && (u != u2)) {
 		fprintf(stderr,
 			"%llu fails uint-float-uint round trip as:\n%llu\n",
 			(unsigned long long)u, (unsigned long long)u2);
@@ -135,7 +134,7 @@ int main(int argc, char **argv)
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
 	if (step <= 0) {
-		step = (INT64_MAX / (64 * 1024));
+		step = (INT64_MAX / (128 * 1024));
 	}
 	limit = (INT64_MAX / step);
 
