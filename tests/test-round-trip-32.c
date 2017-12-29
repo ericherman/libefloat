@@ -134,7 +134,7 @@ int main(int argc, char **argv)
 	step = argc > 2 ? atoi(argv[2]) : 0;
 
 	if (step <= 0) {
-		step = (INT32_MAX / (128 * 1024));
+		step = (INT32_MAX / (1024 * 1024));
 	}
 	limit = (INT32_MAX / step);
 
