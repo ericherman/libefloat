@@ -43,7 +43,9 @@ SYSTEM_CONFIG_CFLAGS= \
  -DHAVE_STDINT_H=1 \
  -DHAVE_FLOAT_H=1 \
  -DHAVE_LIMITS_H=1 \
- -DHAVE_STDIO_H=1
+ -DHAVE_STDIO_H=1 \
+ -Defloat32_also_signed_ints=1 \
+ -Defloat64_also_signed_ints=1
 
 # typical
 BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
