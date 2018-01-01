@@ -92,7 +92,7 @@ int int32_efloat32_round_trip(int32_t i)
 
 	i2 = efloat32_to_int32(f);
 
-	if (i != i2) {
+	if ((FP_NAN != fpclassify(f)) && (i != i2)) {
 		fprintf(stderr,
 			"%lld fails int-float-int round trip as:\n%lld\n",
 			(long long)i, (long long)i2);

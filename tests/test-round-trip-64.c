@@ -92,7 +92,7 @@ int int64_efloat64_round_trip(int64_t i)
 
 	i2 = efloat64_to_int64(f);
 
-	if (i != i2) {
+	if ((FP_NAN != fpclassify(f)) && (i != i2)) {
 		fprintf(stderr,
 			"%lld fails int-float-int round trip as:\n%lld\n",
 			(long long)i, (long long)i2);
