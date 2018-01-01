@@ -33,15 +33,15 @@ https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 extern "C" {
 #endif
 
-#if HAVE_STDINT_H
+#ifndef SKIP_STDINT_H
 #include <stdint.h>
 #endif
 
-#if HAVE_LIMITS_H
+#ifndef SKIP_LIMITS_H
 #include <limits.h>
 #endif
 
-#if HAVE_FLOAT_H
+#ifndef SKIP_FLOAT_H
 #include <float.h>
 #endif
 
@@ -166,7 +166,7 @@ enum efloat_class {
 #if ((defined efloat32_exists) && (efloat32_exists))
 efloat32 uint32_to_efloat32(uint32_t i);
 uint32_t efloat32_to_uint32(efloat32 f);
-#if ((defined efloat32_also_signed_ints) && (efloat32_also_signed_ints))
+#ifndef SKIP_EFLOAT_SIGNED_INTS
 efloat32 int32_to_efloat32(int32_t i);
 int32_t efloat32_to_int32(efloat32 f);
 #endif
@@ -184,7 +184,7 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 #if ((defined efloat64_exists) && (efloat64_exists))
 efloat64 uint64_to_efloat64(uint64_t i);
 uint64_t efloat64_to_uint64(efloat64 f);
-#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
+#ifndef SKIP_EFLOAT_SIGNED_INTS
 efloat64 int64_to_efloat64(int64_t i);
 int64_t efloat64_to_int64(efloat64 f);
 #endif /* efloat64_also_signed_ints */
