@@ -19,32 +19,32 @@ version.
 unsigned efloat32_round_trip(efloat32 f)
 {
 	efloat32 f2;
-	uint8_t sign, s2;
-	int16_t exponent, exp2;
-	uint64_t significand, signif2;
-
+	struct efloat32_fields fields;
+	struct efloat32_fields fields2;
 	enum efloat_class cls, cls2;
 
-	cls = efloat32_radix_2_to_fields(f, &sign, &exponent, &significand);
+	cls = efloat32_radix_2_to_fields(f, &fields);
 	if (cls != fpclassify(f)) {
 		fprintf(stderr, "cls %d != fpclassify (%d)\n", cls,
 			fpclassify(f));
 		return 1;
 	}
 
-	f2 = efloat32_radix_2_from_fields(sign, exponent, significand, &cls2);
+	f2 = efloat32_radix_2_from_fields(fields, &cls2);
 	if (efloat32_to_uint32(f2) == efloat32_to_uint32(f)) {
 		return 0;
 	}
 
-	efloat32_radix_2_to_fields(f2, &s2, &exp2, &signif2);
+	efloat32_radix_2_to_fields(f2, &fields2);
 	fprintf(stderr, "%g (%llu) != %g (%llu)\n",
 		f2, (unsigned long long)efloat32_to_uint32(f2),
 		f, (unsigned long long)efloat32_to_uint32(f));
 	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f,
-		sign, exponent, (unsigned long long)significand);
+		fields.sign, fields.exponent,
+		(unsigned long long)fields.significand);
 	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f2,
-		s2, exp2, (unsigned long long)signif2);
+		fields2.sign, fields2.exponent,
+		(unsigned long long)fields2.significand);
 	if (cls2 != cls) {
 		fprintf(stderr, "cls %d != %d\n", cls2, cls);
 	}

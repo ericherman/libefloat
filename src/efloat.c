@@ -132,35 +132,31 @@ int32_t efloat32_to_int32(efloat32 f)
 
 enum efloat_class efloat32_classify(efloat32 f)
 {
-	uint8_t sign;
-	int16_t exp;
-	uint64_t signif;
+	struct efloat32_fields fields;
 
-	sign = 0;
-	exp = 0;
-	signif = 0;
-	return efloat32_radix_2_to_fields(f, &sign, &exp, &signif);
+	fields.sign = 0;
+	fields.exponent = 0;
+	fields.significand = 0;
+	return efloat32_radix_2_to_fields(f, &fields);
 }
 
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
-					     uint8_t *sign,
-					     int16_t *exponent,
-					     uint64_t *significand)
+					     struct efloat32_fields *fields)
 {
 	uint32_t u32, raw_exp;
 
 	u32 = efloat32_to_uint32(f);
 
-	*sign = (u32 & efloat32_r2_sign_mask) ? 1U : 0U;
+	fields->sign = (u32 & efloat32_r2_sign_mask) ? 1U : 0U;
 
 	raw_exp = (u32 & efloat32_r2_rexp_mask);
 	raw_exp = (raw_exp >> efloat32_r2_exp_shift);
-	*exponent = (raw_exp - efloat32_r2_exp_max);
+	fields->exponent = (raw_exp - efloat32_r2_exp_max);
 
-	*significand = u32 & efloat32_r2_signif_mask;
+	fields->significand = u32 & efloat32_r2_signif_mask;
 
-	if (*exponent == efloat32_r2_exp_inf_nan) {
-		if (*significand) {
+	if (fields->exponent == efloat32_r2_exp_inf_nan) {
+		if (fields->significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -169,12 +165,13 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 		}
 	}
 
-	if (*significand == 0 && *exponent == efloat32_r2_exp_min) {
+	if ((fields->significand == 0)
+	    && (fields->exponent == efloat32_r2_exp_min)) {
 		/* zero or -zero */
 		return ef_zero;
 	}
 
-	if (*exponent == efloat32_r2_exp_min) {
+	if (fields->exponent == efloat32_r2_exp_min) {
 		/* subnormal */
 		return ef_subnorm;
 	}
@@ -182,60 +179,59 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 	return ef_normal;
 }
 
-efloat32 efloat32_radix_2_from_fields(uint8_t sign,
-				      int16_t exponent,
-				      uint64_t significand,
+efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
 				      enum efloat_class *efloat32class)
 {
 	efloat32 f;
 	uint32_t u32, raw_exp;
-	int16_t exp2;
-	uint8_t s2;
-	uint64_t signif2;
+	struct efloat32_fields f2;
 	int err;
 
 	err = 0;
-	s2 = sign ? 1 : 0;
+	f2.sign = fields.sign ? 1 : 0;
 
-	if (exponent > efloat32_r2_exp_inf_nan
-	    || exponent < efloat32_r2_exp_min) {
+	if (fields.exponent > efloat32_r2_exp_inf_nan
+	    || fields.exponent < efloat32_r2_exp_min) {
+		seterrnoinval();
 		err = 1;
-		exponent = efloat32_r2_exp_inf_nan;
+		fields.exponent = efloat32_r2_exp_inf_nan;
 	}
-	raw_exp = (exponent + efloat32_r2_exp_max);
+	raw_exp = (fields.exponent + efloat32_r2_exp_max);
 
-	if (significand != (significand & efloat32_r2_signif_mask)) {
+	if (fields.significand !=
+	    (fields.significand & efloat32_r2_signif_mask)) {
+		seterrnoinval();
 		err = 1;
-		significand = (significand & efloat32_r2_signif_mask);
+		fields.significand =
+		    (fields.significand & efloat32_r2_signif_mask);
 	}
 
-	u32 = (sign ? efloat32_r2_sign_mask : 0)
+	u32 = (fields.sign ? efloat32_r2_sign_mask : 0)
 	    | (raw_exp << efloat32_r2_exp_shift)
-	    | significand;
+	    | fields.significand;
 
 	f = uint32_to_efloat32(u32);
 	if (efloat32class) {
-		*efloat32class =
-		    efloat32_radix_2_to_fields(f, &s2, &exp2, &signif2);
+		*efloat32class = efloat32_radix_2_to_fields(f, &f2);
 	} else {
-		efloat32_radix_2_to_fields(f, &s2, &exp2, &signif2);
+		efloat32_radix_2_to_fields(f, &f2);
 	}
 	if (!err) {
-		if ((!sign) != (!s2)) {
+		if ((!fields.sign) != (!f2.sign)) {
 			seterrnoinval();
-			eprintf2("sign %u != %u\n", (unsigned)sign,
-				 (unsigned)s2);
+			eprintf2("sign %u != %u\n",
+				 (unsigned)fields.sign, (unsigned)f2.sign);
 		}
-		if (exponent != exp2) {
+		if (fields.exponent != f2.exponent) {
 			seterrnoinval();
-			eprintf2("exponent %d != %d\n", (int)exponent,
-				 (int)exp2);
+			eprintf2("exponent %d != %d\n",
+				 (int)fields.exponent, (int)f2.exponent);
 		}
-		if (significand != signif2) {
+		if (fields.significand != f2.significand) {
 			seterrnoinval();
 			eprintf2("significand %lu != %lu\n",
-				 (unsigned long)significand,
-				 (unsigned long)signif2);
+				 (unsigned long)fields.significand,
+				 (unsigned long)fields.significand);
 		}
 	}
 	return f;
@@ -319,35 +315,31 @@ int64_t efloat64_to_int64(efloat64 f)
 
 enum efloat_class efloat64_classify(efloat64 f)
 {
-	uint8_t sign;
-	int16_t exp;
-	uint64_t signif;
+	struct efloat64_fields fields;
 
-	sign = 0;
-	exp = 0;
-	signif = 0;
-	return efloat64_radix_2_to_fields(f, &sign, &exp, &signif);
+	fields.sign = 0;
+	fields.exponent = 0;
+	fields.significand = 0;
+	return efloat64_radix_2_to_fields(f, &fields);
 }
 
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
-					     uint8_t *sign,
-					     int16_t *exponent,
-					     uint64_t *significand)
+					     struct efloat64_fields *fields)
 {
 	uint64_t u64, raw_exp;
 
 	u64 = efloat64_to_uint64(f);
 
-	*sign = (u64 & efloat64_r2_sign_mask) ? 1U : 0U;
+	fields->sign = (u64 & efloat64_r2_sign_mask) ? 1U : 0U;
 
 	raw_exp = (u64 & efloat64_r2_rexp_mask);
 	raw_exp = (raw_exp >> efloat64_r2_exp_shift);
-	*exponent = (raw_exp - efloat64_r2_exp_max);
+	fields->exponent = (raw_exp - efloat64_r2_exp_max);
 
-	*significand = u64 & efloat64_r2_signif_mask;
+	fields->significand = u64 & efloat64_r2_signif_mask;
 
-	if (*exponent == efloat64_r2_exp_inf_nan) {
-		if (*significand) {
+	if (fields->exponent == efloat64_r2_exp_inf_nan) {
+		if (fields->significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -356,12 +348,13 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 		}
 	}
 
-	if (*significand == 0 && *exponent == efloat64_r2_exp_min) {
+	if ((fields->significand == 0)
+	    && (fields->exponent == efloat64_r2_exp_min)) {
 		/* zero or -zero */
 		return ef_zero;
 	}
 
-	if (*exponent == efloat64_r2_exp_min) {
+	if (fields->exponent == efloat64_r2_exp_min) {
 		/* subnormal */
 		return ef_subnorm;
 	}
@@ -369,60 +362,59 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 	return ef_normal;
 }
 
-efloat64 efloat64_radix_2_from_fields(uint8_t sign,
-				      int16_t exponent,
-				      uint64_t significand,
+efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 				      enum efloat_class *efloat64class)
 {
 	efloat64 f;
 	uint64_t u64, raw_exp;
-	int16_t exp2;
-	uint8_t s2;
-	uint64_t signif2;
+	struct efloat64_fields f2;
 	int err;
 
 	err = 0;
-	s2 = sign ? 1 : 0;
+	f2.sign = fields.sign ? 1 : 0;
 
-	if (exponent > efloat64_r2_exp_inf_nan
-	    || exponent < efloat64_r2_exp_min) {
+	if (fields.exponent > efloat64_r2_exp_inf_nan
+	    || fields.exponent < efloat64_r2_exp_min) {
+		seterrnoinval();
 		err = 1;
-		exponent = efloat64_r2_exp_inf_nan;
+		fields.exponent = efloat64_r2_exp_inf_nan;
 	}
-	raw_exp = (exponent + efloat64_r2_exp_max);
+	raw_exp = (fields.exponent + efloat64_r2_exp_max);
 
-	if (significand != (significand & efloat64_r2_signif_mask)) {
+	if (fields.significand !=
+	    (fields.significand & efloat64_r2_signif_mask)) {
+		seterrnoinval();
 		err = 1;
-		significand = (significand & efloat64_r2_signif_mask);
+		fields.significand =
+		    (fields.significand & efloat64_r2_signif_mask);
 	}
 
-	u64 = (sign ? efloat64_r2_sign_mask : 0)
+	u64 = (fields.sign ? efloat64_r2_sign_mask : 0)
 	    | (raw_exp << efloat64_r2_exp_shift)
-	    | significand;
+	    | fields.significand;
 
 	f = uint64_to_efloat64(u64);
 	if (efloat64class) {
-		*efloat64class =
-		    efloat64_radix_2_to_fields(f, &s2, &exp2, &signif2);
+		*efloat64class = efloat64_radix_2_to_fields(f, &f2);
 	} else {
-		efloat64_radix_2_to_fields(f, &s2, &exp2, &signif2);
+		efloat64_radix_2_to_fields(f, &f2);
 	}
 	if (!err) {
-		if ((!sign) != (!s2)) {
+		if ((!fields.sign) != (!f2.sign)) {
 			seterrnoinval();
-			eprintf2("sign %u != %u\n", (unsigned)sign,
-				 (unsigned)s2);
+			eprintf2("sign %u != %u\n",
+				 (unsigned)fields.sign, (unsigned)f2.sign);
 		}
-		if (exponent != exp2) {
+		if (fields.exponent != f2.exponent) {
 			seterrnoinval();
-			eprintf2("exponent %d != %d\n", (int)exponent,
-				 (int)exp2);
+			eprintf2("exponent %d != %d\n",
+				 (int)fields.exponent, (int)f2.exponent);
 		}
-		if (significand != signif2) {
+		if (fields.significand != f2.significand) {
 			seterrnoinval();
 			eprintf2("significand %lu != %lu\n",
-				 (unsigned long)significand,
-				 (unsigned long)signif2);
+				 (unsigned long)fields.significand,
+				 (unsigned long)f2.significand);
 		}
 	}
 	return f;

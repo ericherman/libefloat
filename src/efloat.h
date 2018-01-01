@@ -131,6 +131,18 @@ enum efloat_class {
 	ef_normal = 4
 };
 
+struct efloat32_fields {
+	uint8_t sign;
+	int16_t exponent;
+	uint32_t significand;
+};
+
+struct efloat64_fields {
+	uint8_t sign;
+	int16_t exponent;
+	uint64_t significand;
+};
+
 #if ((defined efloat32_exists) && (efloat32_exists))
 #define efloat32_r2_exp_max 127
 #define efloat32_r2_exp_min -127
@@ -172,12 +184,8 @@ int32_t efloat32_to_int32(efloat32 f);
 #endif
 enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
-					     uint8_t *sign,
-					     int16_t *exponent,
-					     uint64_t *significand);
-efloat32 efloat32_radix_2_from_fields(uint8_t sign,
-				      int16_t exponent,
-				      uint64_t significand,
+					     struct efloat32_fields *fields);
+efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
 				      enum efloat_class *efloat32class);
 #endif
 
@@ -190,32 +198,32 @@ int64_t efloat64_to_int64(efloat64 f);
 #endif /* efloat64_also_signed_ints */
 enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
-					     uint8_t *sign,
-					     int16_t *exponent,
-					     uint64_t *significand);
-efloat64 efloat64_radix_2_from_fields(uint8_t sign,
-				      int16_t exponent,
-				      uint64_t significand,
+					     struct efloat64_fields *fields);
+efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 				      enum efloat_class *efloat64class);
 #endif
 
 #if (efloat_float == 32)
-#define efloat_float_to_fields(f,s,e,m) efloat32_radix_2_to_fields(f,s,e,m)
+#define efloat_float_fields efloat32_fields
+#define efloat_float_to_fields(f,fields) efloat32_radix_2_to_fields(f,fields)
 #define efloat_float_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
 #if (efloat_float == 64)
-#define efloat_float_to_fields(f,s,e,m) efloat64_radix_2_to_fields(f,s,e,m)
+#define efloat_float_fields efloat64_fields
+#define efloat_float_to_fields(f,fields) efloat64_radix_2_to_fields(f,fields)
 #define efloat_float_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
 #if (efloat_double == 32)
-#define efloat_double_to_fields(f,s,e,m) efloat32_radix_2_to_fields(f,s,e,m)
+#define efloat_double_fields efloat32_fields
+#define efloat_double_to_fields(d,fields) efloat32_radix_2_to_fields(d,fields)
 #define efloat_double_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
 #if (efloat_double == 64)
-#define efloat_double_to_fields(f,s,e,m) efloat64_radix_2_to_fields(f,s,e,m)
+#define efloat_double_fields efloat64_fields
+#define efloat_double_to_fields(f,fields) efloat64_radix_2_to_fields(d,fields)
 #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
