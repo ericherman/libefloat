@@ -134,7 +134,7 @@ enum efloat_class efloat32_classify(efloat32 f)
 {
 	uint8_t sign;
 	int16_t exp;
-	uint32_t signif;
+	uint64_t signif;
 
 	sign = 0;
 	exp = 0;
@@ -145,7 +145,7 @@ enum efloat_class efloat32_classify(efloat32 f)
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint32_t *significand)
+					     uint64_t *significand)
 {
 	uint32_t u32, raw_exp;
 
@@ -184,14 +184,14 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 
 efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint32_t significand,
+				      uint64_t significand,
 				      enum efloat_class *efloat32class)
 {
 	efloat32 f;
 	uint32_t u32, raw_exp;
 	int16_t exp2;
 	uint8_t s2;
-	uint32_t signif2;
+	uint64_t signif2;
 	int err;
 
 	err = 0;

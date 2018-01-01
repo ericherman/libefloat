@@ -21,7 +21,7 @@ unsigned efloat32_round_trip(efloat32 f)
 	efloat32 f2;
 	uint8_t sign, s2;
 	int16_t exponent, exp2;
-	uint32_t significand, signif2;
+	uint64_t significand, signif2;
 
 	enum efloat_class cls, cls2;
 

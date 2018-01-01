@@ -12,8 +12,8 @@
  
  #ifndef SKIP_STDINT_H
  #include <stdint.h>
-@@ -199,8 +201,10 @@
- 				      enum efloat_class *efloat64class);
+@@ -219,8 +221,10 @@
+ #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
  #endif
  
 +/*

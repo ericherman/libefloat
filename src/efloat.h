@@ -174,10 +174,10 @@ enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     uint8_t *sign,
 					     int16_t *exponent,
-					     uint32_t *significand);
+					     uint64_t *significand);
 efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
-				      uint32_t significand,
+				      uint64_t significand,
 				      enum efloat_class *efloat32class);
 #endif
 
@@ -197,6 +197,26 @@ efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 				      int16_t exponent,
 				      uint64_t significand,
 				      enum efloat_class *efloat64class);
+#endif
+
+#if (efloat_float == 32)
+#define efloat_float_to_fields(f,s,e,m) efloat32_radix_2_to_fields(f,s,e,m)
+#define efloat_float_exp_inf_nan efloat32_r2_exp_inf_nan
+#endif
+
+#if (efloat_float == 64)
+#define efloat_float_to_fields(f,s,e,m) efloat64_radix_2_to_fields(f,s,e,m)
+#define efloat_float_exp_inf_nan efloat64_r2_exp_inf_nan
+#endif
+
+#if (efloat_double == 32)
+#define efloat_double_to_fields(f,s,e,m) efloat32_radix_2_to_fields(f,s,e,m)
+#define efloat_double_exp_inf_nan efloat32_r2_exp_inf_nan
+#endif
+
+#if (efloat_double == 64)
+#define efloat_double_to_fields(f,s,e,m) efloat64_radix_2_to_fields(f,s,e,m)
+#define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
 #ifdef __cplusplus
