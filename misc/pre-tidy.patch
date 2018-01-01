@@ -10,7 +10,7 @@
  #endif
 +*/
  
- #if HAVE_STDINT_H
+ #ifndef SKIP_STDINT_H
  #include <stdint.h>
 @@ -199,8 +201,10 @@
  				      enum efloat_class *efloat64class);

@@ -40,7 +40,10 @@ CC=gcc
 
 SYSTEM_CONFIG_CFLAGS= \
  -DHAVE_MEMCPY=1 \
- -DHAVE_STDIO_H=1
+ -DHAVE_STRING_H=1 \
+ -DHAVE_STDIO_H=1 \
+ -DHAVE_ERRNO=1 \
+ -DHAVE_ERRNO_H=1
 
 # typical
 BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
@@ -59,10 +62,9 @@ INCLUDES_CFLAGS=-I./src
 BASE_CFLAGS=$(CFLAGS) \
  $(NOISY_CFLAGS) \
  $(BUILD_TYPE_CFLAGS) \
- $(SYSTEM_CONFIG_CFLAGS) \
  $(INCLUDES_CFLAGS)
 
-LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS)
+LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS) $(SYSTEM_CONFIG_CFLAGS)
 
 # tests need "gnu89" for fpclassify
 TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long
@@ -152,7 +154,10 @@ check-static: check-32-static check-64-static
 
 check-dynamic: check-32-dynamic check-64-dynamic
 
-check: check-32 check-64
+echo_makeflags:
+	echo "MAKEFLAGS='$(MAKEFLAGS)'"
+
+check: echo_makeflags check-32 check-64
 
 valgrind-32: ./$(TEST_32_EXE)-static
 	valgrind ./$(TEST_32_EXE)-static

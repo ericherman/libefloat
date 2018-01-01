@@ -25,7 +25,10 @@ version.
 #ifndef HAVE_MEMCPY
 #define HAVE_MEMCPY 0
 #endif
-#if (HAVE_MEMCPY)
+#ifndef HAVE_STRING_H
+#define HAVE_STRING_H 0
+#endif
+#if (HAVE_MEMCPY && HAVE_STRING_H)
 #include <string.h>		/* memcpy */
 #endif
 /*
@@ -36,6 +39,20 @@ version.
    The calls to memcpy() here are probably going to be removed by gcc:
    gcc output: https://godbolt.org/g/hiX8oL
 */
+
+#ifndef HAVE_ERRNO
+#define HAVE_ERRNO 0
+#endif
+#ifndef HAVE_ERRNO_H
+#define HAVE_ERRNO_H 0
+#endif
+#if (HAVE_ERRNO && HAVE_ERRNO_H)
+#include <errno.h>
+#define seterrnoinval() do { errno = EINVAL; } while (0)
+#endif
+#ifndef seterrnoinval
+#define seterrnoinval()		/* NOOP */
+#endif
 
 #if ((defined efloat32_exists) && (efloat32_exists))
 #if HAVE_MEMCPY
@@ -205,14 +222,17 @@ efloat32 efloat32_radix_2_from_fields(uint8_t sign,
 	}
 	if (!err) {
 		if ((!sign) != (!s2)) {
+			seterrnoinval();
 			eprintf2("sign %u != %u\n", (unsigned)sign,
 				 (unsigned)s2);
 		}
 		if (exponent != exp2) {
+			seterrnoinval();
 			eprintf2("exponent %d != %d\n", (int)exponent,
 				 (int)exp2);
 		}
 		if (significand != signif2) {
+			seterrnoinval();
 			eprintf2("significand %lu != %lu\n",
 				 (unsigned long)significand,
 				 (unsigned long)signif2);
@@ -389,14 +409,17 @@ efloat64 efloat64_radix_2_from_fields(uint8_t sign,
 	}
 	if (!err) {
 		if ((!sign) != (!s2)) {
+			seterrnoinval();
 			eprintf2("sign %u != %u\n", (unsigned)sign,
 				 (unsigned)s2);
 		}
 		if (exponent != exp2) {
+			seterrnoinval();
 			eprintf2("exponent %d != %d\n", (int)exponent,
 				 (int)exp2);
 		}
 		if (significand != signif2) {
+			seterrnoinval();
 			eprintf2("significand %lu != %lu\n",
 				 (unsigned long)significand,
 				 (unsigned long)signif2);
