@@ -33,15 +33,19 @@ https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 extern "C" {
 #endif
 
-#ifndef SKIP_STDINT_H
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if HAVE_STDINT_H
 #include <stdint.h>
 #endif
 
-#ifndef SKIP_LIMITS_H
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 
-#ifndef SKIP_FLOAT_H
+#if HAVE_FLOAT_H
 #include <float.h>
 #endif
 
@@ -223,7 +227,7 @@ efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 
 #if (efloat_double == 64)
 #define efloat_double_fields efloat64_fields
-#define efloat_double_to_fields(f,fields) efloat64_radix_2_to_fields(d,fields)
+#define efloat_double_to_fields(d,fields) efloat64_radix_2_to_fields(d,fields)
 #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 

@@ -10,9 +10,9 @@
  #endif
 +*/
  
- #ifndef SKIP_STDINT_H
- #include <stdint.h>
-@@ -227,8 +229,10 @@
+ #if HAVE_CONFIG_H
+ #include <config.h>
+@@ -231,8 +233,10 @@
  #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
  #endif
  

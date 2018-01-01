@@ -40,16 +40,11 @@ version.
    gcc output: https://godbolt.org/g/hiX8oL
 */
 
-#ifndef HAVE_ERRNO
-#define HAVE_ERRNO 0
-#endif
-#ifndef HAVE_ERRNO_H
-#define HAVE_ERRNO_H 0
-#endif
-#if (HAVE_ERRNO && HAVE_ERRNO_H)
+#if HAVE_ERRNO_H
 #include <errno.h>
 #define seterrnoinval() do { errno = EINVAL; } while (0)
 #endif
+
 #ifndef seterrnoinval
 #define seterrnoinval()		/* NOOP */
 #endif

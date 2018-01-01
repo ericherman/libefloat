@@ -11,10 +11,13 @@ version 2.1 of the License, or (at your option) any later
 version.
 */
 
-#include <efloat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
+#include <limits.h>
+#include <stdint.h>
+#include <efloat.h>
 
 unsigned efloat32_round_trip(efloat32 f)
 {
