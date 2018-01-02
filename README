@@ -56,6 +56,7 @@ float.h vales are defined:
 
  * Additionally, an equivilent to the "fpclassify" function from math.h
    is provided:
+
 	enum efloat_class {
 		ef_nan = 0,
 		ef_inf = 1,
@@ -64,19 +65,42 @@ float.h vales are defined:
 		ef_normal = 4
 	};
 	enum efloat_class efloat64_classify(efloat64 f)
-   The enum efloat_class values are mapped to the same values as math.h.
+
+   The enum efloat_class values are mapped to the same values as math.h
+   as was provided by glibc on linux.
 
  * Functions for extracting infromation from the float are provided:
 
-	enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
-	                                             uint8_t *sign,
-	                                             int16_t *exponent,
-	                                             uint64_t *significand)
+	struct efloat32_fields {
+		uint8_t sign;
+		int16_t exponent;
+		uint32_t significand;
+	};
 
-	efloat64 efloat64_radix_2_from_fields(uint8_t sign,
-	                                      int16_t exponent,
-	                                      uint64_t significand,
-	                                      enum efloat_class *efloat64class)
+	enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
+	                              struct efloat32_fields *fields);
+
+	efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
+	                                     enum efloat_class *efloat32class);
+
+ * There are #defines which allow for slightly easier platform independent code:
+
+	struct efloat_double_fields fields;
+	double d = -123.0/0.5;
+
+	#if (efloat_double == 64)
+	uint64_t u = efloat64_to_uint64(d);
+	#else
+	uint32_t u = efloat32_to_uint32(d);
+	#endif
+
+	efloat_double_to_fields(d, &fields);
+	printf("%f as unsigned: %lu (sign: %d, exp: %d, mant: %lu)\n",
+		d,
+		(unsigned long)u,
+		(int)fields.sign,
+		(int)fields.exponent,
+		(unsigned long)fields.significand);
 
 
 Usage
