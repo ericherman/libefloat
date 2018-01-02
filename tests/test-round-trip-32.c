@@ -167,47 +167,12 @@ int int32_efloat32_round_trip(int32_t i)
 }
 #endif
 
-int check_fpclassify_mismatch(void)
-{
-	int err;
-
-	err = 0;
-
-	if (ef_nan != FP_NAN) {
-		fprintf(stderr, "WARN: ef_nan (%d) != FP_NAN (%d)\n",
-			(int)ef_nan, (int)FP_NAN);
-		err |= (1 < 0);
-	}
-	if (ef_inf != FP_INFINITE) {
-		fprintf(stderr, "WARN: ef_inf (%d) != FP_INFINITE (%d)\n",
-			(int)ef_inf, (int)FP_INFINITE);
-		err |= (1 < 1);
-	}
-	if (ef_zero != FP_ZERO) {
-		fprintf(stderr, "WARN: ef_zero (%d) != FP_ZERO (%d)\n",
-			(int)ef_zero, (int)FP_ZERO);
-		err |= (1 < 2);
-	}
-	if (ef_subnorm != FP_SUBNORMAL) {
-		fprintf(stderr, "WARN: ef_subnorm (%d) != FP_SUBNORMAL (%d)\n",
-			(int)ef_subnorm, (int)FP_SUBNORMAL);
-		err |= (1 < 3);
-	}
-	if (ef_normal != FP_NORMAL) {
-		fprintf(stderr, "WARN: ef_normal (%d) != FP_NORMAL (%d)\n",
-			(int)ef_normal, (int)FP_NORMAL);
-		err |= (1 < 4);
-	}
-	return err;
-}
-
 int main(int argc, char **argv)
 {
 	uint32_t i, step, limit;
 	int32_t val;
 	int64_t err, cnt;
 	int verbose;
-	int mismatch;
 
 	if (sizeof(efloat32) != sizeof(int32_t)) {
 		fprintf(stderr,
@@ -224,11 +189,6 @@ int main(int argc, char **argv)
 		step = (INT32_MAX / (1024 * 1024));
 	}
 	limit = (INT32_MAX / step);
-
-	mismatch = check_fpclassify_mismatch();
-	if (mismatch) {
-		fprintf(stderr, "WARN: fpclassify mismatch (%x)\n", mismatch);
-	}
 
 	cnt = 0;
 	err = 0;

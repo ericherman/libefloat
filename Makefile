@@ -113,6 +113,11 @@ $(A_NAME): $(SO_OBJS)
 
 $(LIB_NAME): $(SO_NAME) $(A_NAME)
 
+warn-if-fpclassify-mismatch: $(A_NAME) tests/warn-if-fpclassify-mismatch.c
+	$(CC) $(TEST_CFLAGS) $(A_NAME) tests/warn-if-fpclassify-mismatch.c \
+		-o warn-if-fpclassify-mismatch
+	./warn-if-fpclassify-mismatch
+
 $(TEST_32_OBJ): $(EFLT_LIB_HDR) $(TEST_32_SRC)
 	$(CC) -c $(TEST_CFLAGS) $(TEST_32_SRC) -o $(TEST_32_OBJ)
 
@@ -123,10 +128,10 @@ $(TEST_32_EXE)-dynamic: $(TEST_32_OBJ) $(SO_NAME)
 	$(CC) $(TEST_32_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_32_EXE)-dynamic $(TEST_LDADD)
 
-check-32-static: $(TEST_32_EXE)-static
+check-32-static: $(TEST_32_EXE)-static warn-if-fpclassify-mismatch
 	./$(TEST_32_EXE)-static
 
-check-32-dynamic: $(TEST_32_EXE)-dynamic
+check-32-dynamic: $(TEST_32_EXE)-dynamic warn-if-fpclassify-mismatch
 	LD_LIBRARY_PATH=. ./$(TEST_32_EXE)-dynamic
 
 check-32: check-32-static check-32-dynamic
@@ -145,10 +150,10 @@ $(TEST_64_EXE)-dynamic: $(TEST_64_OBJ) $(SO_NAME)
 	$(CC) $(TEST_64_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_64_EXE)-dynamic $(TEST_LDADD)
 
-check-64-static: $(TEST_64_EXE)-static
+check-64-static: $(TEST_64_EXE)-static warn-if-fpclassify-mismatch
 	./$(TEST_64_EXE)-static
 
-check-64-dynamic: $(TEST_64_EXE)-dynamic
+check-64-dynamic: $(TEST_64_EXE)-dynamic warn-if-fpclassify-mismatch
 	LD_LIBRARY_PATH=. ./$(TEST_64_EXE)-dynamic
 
 check-64: check-64-static check-64-dynamic
