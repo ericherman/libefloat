@@ -161,6 +161,7 @@ echo_makeflags:
 	echo "MAKEFLAGS='$(MAKEFLAGS)'"
 
 check: echo_makeflags check-32 check-64
+	@echo "success"
 
 valgrind-32: ./$(TEST_32_EXE)-static
 	valgrind ./$(TEST_32_EXE)-static

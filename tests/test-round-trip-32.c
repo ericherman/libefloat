@@ -19,20 +19,68 @@ version.
 #include <stdint.h>
 #include <efloat.h>
 
-unsigned efloat32_round_trip(efloat32 f, int skip_fpclassify)
+int check_fpclassify(enum efloat_class cls, efloat32 f)
+{
+	int err = 0;
+	const char *fpstr;
+	char *ef_strs[] =
+	    { "ef_nan", "ef_inf", "ef_zero", "ef_subnorm", "ef_normal" };
+
+	switch (cls) {
+	case ef_nan:
+		err = (fpclassify(f) != FP_NAN);
+		break;
+	case ef_inf:
+		err = (fpclassify(f) != FP_INFINITE);
+		break;
+	case ef_zero:
+		err = (fpclassify(f) != FP_ZERO);
+		break;
+	case ef_subnorm:
+		err = (fpclassify(f) != FP_SUBNORMAL);
+		break;
+	case ef_normal:
+		err = (fpclassify(f) != FP_NORMAL);
+		break;
+	}
+	if (err) {
+		switch (fpclassify(f)) {
+		case FP_NAN:
+			fpstr = "FP_NAN";
+			break;
+		case FP_INFINITE:
+			fpstr = "FP_INFINITE";
+			break;
+		case FP_ZERO:
+			fpstr = "FP_ZERO";
+			break;
+		case FP_SUBNORMAL:
+			fpstr = "FP_SUBNORMAL";
+			break;
+		case FP_NORMAL:
+			fpstr = "FP_NORMAL";
+			break;
+		default:
+			fpstr = "(UNKNOWN)";
+			break;
+		}
+
+		fprintf(stderr, "cls %s (%d) != %s (%d) from fpclassify(%f)\n",
+			ef_strs[cls], (int)cls, fpstr, (int)fpclassify(f),
+			(double)f);
+	}
+	return err;
+}
+
+unsigned efloat32_round_trip(efloat32 f)
 {
 	efloat32 f2;
 	struct efloat32_fields fields;
 	struct efloat32_fields fields2;
 	enum efloat_class cls, cls2;
-	int err;
 
 	cls = efloat32_radix_2_to_fields(f, &fields);
-	err = (skip_fpclassify || ((int)cls == (int)fpclassify(f))) ? 0 : 1;
-	if (err) {
-		fprintf(stderr, "WARN: cls %d != %d from fpclassify(%f)\n",
-			(int)cls, (int)fpclassify(f), (double)f);
-	}
+	check_fpclassify(cls, f);
 
 	f2 = efloat32_radix_2_from_fields(fields, &cls2);
 	if (efloat32_to_uint32(f2) == efloat32_to_uint32(f)) {
@@ -56,13 +104,13 @@ unsigned efloat32_round_trip(efloat32 f, int skip_fpclassify)
 	return 1;
 }
 
-int uint32_efloat32_round_trip(uint32_t u, int skip_fpclassify)
+int uint32_efloat32_round_trip(uint32_t u)
 {
 	int err;
 	uint32_t u2;
 	efloat32 f;
 	f = uint32_to_efloat32(u);
-	err = efloat32_round_trip(f, skip_fpclassify);
+	err = efloat32_round_trip(f);
 	if (err) {
 		return 1;
 	}
@@ -82,14 +130,14 @@ int uint32_efloat32_round_trip(uint32_t u, int skip_fpclassify)
 }
 
 #if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
-int int32_efloat32_round_trip(int32_t i, int skip_fpclassify)
+int int32_efloat32_round_trip(int32_t i)
 {
 	int err;
 	int32_t i2;
 	efloat32 f;
 
 	f = int32_to_efloat32(i);
-	err = efloat32_round_trip(f, skip_fpclassify);
+	err = efloat32_round_trip(f);
 	if (err) {
 		return 1;
 	}
@@ -109,17 +157,17 @@ int int32_efloat32_round_trip(int32_t i, int skip_fpclassify)
 	return 0;
 }
 #else
-int int32_efloat32_round_trip(int32_t i, int skip_fpclassify)
+int int32_efloat32_round_trip(int32_t i)
 {
 	uint32_t u;
 
 	u = (i < 0) ? ((UINT32_MAX) - ((uint32_t)(-i))) : ((uint32_t)i);
 
-	return uint32_efloat32_round_trip(u, skip_fpclassify);
+	return uint32_efloat32_round_trip(u);
 }
 #endif
 
-int test_fpclassify_should_match(void)
+int check_fpclassify_mismatch(void)
 {
 	int err;
 
@@ -158,7 +206,8 @@ int main(int argc, char **argv)
 	uint32_t i, step, limit;
 	int32_t val;
 	int64_t err, cnt;
-	int verbose, skip_fpclassify;
+	int verbose;
+	int mismatch;
 
 	if (sizeof(efloat32) != sizeof(int32_t)) {
 		fprintf(stderr,
@@ -176,46 +225,44 @@ int main(int argc, char **argv)
 	}
 	limit = (INT32_MAX / step);
 
-	skip_fpclassify = test_fpclassify_should_match();
-	if (skip_fpclassify) {
-		fprintf(stderr, "WARN: fpclassify will not be checked (%x)\n",
-			skip_fpclassify);
+	mismatch = check_fpclassify_mismatch();
+	if (mismatch) {
+		fprintf(stderr, "WARN: fpclassify mismatch (%x)\n", mismatch);
 	}
 
 	cnt = 0;
 	err = 0;
-	err += efloat32_round_trip(0.0, skip_fpclassify);
+	err += efloat32_round_trip(0.0);
 
-	err += uint32_efloat32_round_trip(0, skip_fpclassify);
-	err += uint32_efloat32_round_trip(UINT32_MAX, skip_fpclassify);
+	err += uint32_efloat32_round_trip(0);
+	err += uint32_efloat32_round_trip(UINT32_MAX);
 
-	err += int32_efloat32_round_trip(-1, skip_fpclassify);
-	err += uint32_efloat32_round_trip((uint32_t)-1, skip_fpclassify);
+	err += int32_efloat32_round_trip(-1);
+	err += uint32_efloat32_round_trip((uint32_t)-1);
 
-	err += int32_efloat32_round_trip(INT32_MAX, skip_fpclassify);
-	err += uint32_efloat32_round_trip((uint32_t)INT32_MAX, skip_fpclassify);
+	err += int32_efloat32_round_trip(INT32_MAX);
+	err += uint32_efloat32_round_trip((uint32_t)INT32_MAX);
 
-	err += int32_efloat32_round_trip(-INT32_MAX, skip_fpclassify);
-	err +=
-	    uint32_efloat32_round_trip((uint32_t)-INT32_MAX, skip_fpclassify);
+	err += int32_efloat32_round_trip(-INT32_MAX);
+	err += uint32_efloat32_round_trip((uint32_t)-INT32_MAX);
 
-	err += int32_efloat32_round_trip(INT32_MIN, skip_fpclassify);
-	err += uint32_efloat32_round_trip((uint32_t)INT32_MIN, skip_fpclassify);
+	err += int32_efloat32_round_trip(INT32_MIN);
+	err += uint32_efloat32_round_trip((uint32_t)INT32_MIN);
 
-	err += efloat32_round_trip(FLT_MAX, skip_fpclassify);
-	err += efloat32_round_trip(-FLT_MAX, skip_fpclassify);
-	err += efloat32_round_trip(FLT_MIN, skip_fpclassify);
-	err += efloat32_round_trip(-FLT_MIN, skip_fpclassify);
-	err += efloat32_round_trip((efloat32)0.0f, skip_fpclassify);
-	err += efloat32_round_trip((efloat32)-0.0f, skip_fpclassify);
+	err += efloat32_round_trip(FLT_MAX);
+	err += efloat32_round_trip(-FLT_MAX);
+	err += efloat32_round_trip(FLT_MIN);
+	err += efloat32_round_trip(-FLT_MIN);
+	err += efloat32_round_trip((efloat32)0.0f);
+	err += efloat32_round_trip((efloat32)-0.0f);
 
-	err += efloat32_round_trip((efloat32)(0.0f / 0.0f), skip_fpclassify);	/* NAN */
+	err += efloat32_round_trip((efloat32)(0.0f / 0.0f));	/* NAN */
 	cnt = 18;
 
 #ifdef INFINITY
-	err += efloat32_round_trip((efloat32)INFINITY, skip_fpclassify);
+	err += efloat32_round_trip((efloat32)INFINITY);
 	++cnt;
-	err += efloat32_round_trip((efloat32)-INFINITY, skip_fpclassify);
+	err += efloat32_round_trip((efloat32)-INFINITY);
 	++cnt;
 #endif
 
@@ -226,13 +273,13 @@ int main(int argc, char **argv)
 	for (i = 0; i < limit; ++i) {
 		++cnt;
 		val = (int32_t)(i * step);
-		err += int32_efloat32_round_trip(val, skip_fpclassify);
+		err += int32_efloat32_round_trip(val);
 		if (err) {
 			return 1;
 		}
 
 		++cnt;
-		err += int32_efloat32_round_trip(-val, skip_fpclassify);
+		err += int32_efloat32_round_trip(-val);
 		if (err) {
 			return 1;
 		}
