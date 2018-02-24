@@ -48,26 +48,26 @@ float.h vales are defined:
 
  * If the "efloat32_exists" is defined, then also defined are:
 
-	efloat32_radix 2
-	efloat32_mant_dig 24
-	efloat32_exp_inf_nan 128
-	efloat32_exp_max  127
-	efloat32_exp_min -127
-	efloat32_max 3.40282e+38
-	efloat32_min 1.17549e-38
+	efloat32_radix		   2
+	efloat32_mant_dig	  24
+	efloat32_exp_inf_nan	 128
+	efloat32_exp_max	 127
+	efloat32_exp_min	-127
+	efloat32_max		   3.40282e+38
+	efloat32_min		   1.17549e-38
 
 	nextafter32(x,y)
 	nexttoward32(x,y)
 
 * If the "efloat64_exists" is defined, then also defined are:
 
-	efloat64_radix 2
-	efloat64_mant_dig 53
-	efloat64_exp_inf_nan 1024
-	efloat64_exp_max  1023
-	efloat64_exp_min -1023
-	efloat64_max 1.79769e+308
-	efloat64_min 2.22507e-308
+	efloat64_radix		    2
+	efloat64_mant_dig	   53
+	efloat64_exp_inf_nan	 1024
+	efloat64_exp_max	 1023
+	efloat64_exp_min	-1023
+	efloat64_max		    1.79769e+308
+	efloat64_min		    2.22507e-308
 
 	nextafter64(x,y)
 	nexttoward64(x,y)
@@ -75,10 +75,11 @@ float.h vales are defined:
  * For each of these types, the header will declare functions to convert
    between integer and floating point types, for easier (de)serialization:
 
-	efloat64 int64_to_efloat64(int64_t i)
+	efloat64  int64_to_efloat64(int64_t i)
 	efloat64 uint64_to_efloat64(uint64_t i)
+
 	uint64_t efloat64_to_uint64(efloat64 f)
-	int64_t efloat64_to_int64(efloat64 f)
+	int64_t  efloat64_to_int64(efloat64 f)
 
  * Because it is useful when comparing floats to know how close two values
    are to each other, distance functions are defined which report the
@@ -91,11 +92,11 @@ float.h vales are defined:
    is provided:
 
 	enum efloat_class {
-		ef_nan = 0,
-		ef_inf = 1,
-		ef_zero = 2,
-		ef_subnorm = 3,
-		ef_normal = 4
+		ef_nan =	0,
+		ef_inf =	1,
+		ef_zero =	2,
+		ef_subnorm =	3,
+		ef_normal =	4
 	};
 	enum efloat_class efloat64_classify(efloat64 f)
 
@@ -118,7 +119,6 @@ float.h vales are defined:
 
  * There are #defines which allow for slightly easier platform independent code:
 
-	struct efloat_double_fields fields;
 	double d = -123.0/0.5;
 
 	#if (efloat_double == 64)
@@ -127,6 +127,7 @@ float.h vales are defined:
 	uint32_t u = efloat32_to_uint32(d);
 	#endif
 
+	struct efloat_double_fields fields;
 	efloat_double_to_fields(d, &fields);
 	printf("%f as unsigned: %lu (sign: %d, exp: %d, mant: %lu)\n",
 		d,
