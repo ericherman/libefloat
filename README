@@ -43,8 +43,34 @@ float.h vales are defined:
    the values "efloat_float", "efloat_double", and/or "efloat_long_double"
    will be #defined to be either 32 or 64.
 
- * Headder attempts to typedef two types: "efloat32" and "efloat64", and
+ * Header attempts to typedef two types: "efloat32" and "efloat64", and
    will #define "efloat32_exists" and "efloat64_exists" accordingly.
+
+ * If the "efloat32_exists" is defined, then also defined are:
+
+	efloat32_radix 2
+	efloat32_mant_dig 24
+	efloat32_exp_inf_nan 128
+	efloat32_exp_max  127
+	efloat32_exp_min -127
+	efloat32_max 3.40282e+38
+	efloat32_min 1.17549e-38
+
+	nextafter32(x,y)
+	nexttoward32(x,y)
+
+* If the "efloat64_exists" is defined, then also defined are:
+
+	efloat64_radix 2
+	efloat64_mant_dig 53
+	efloat64_exp_inf_nan 1024
+	efloat64_exp_max  1023
+	efloat64_exp_min -1023
+	efloat64_max 1.79769e+308
+	efloat64_min 2.22507e-308
+
+	nextafter64(x,y)
+	nexttoward64(x,y)
 
  * For each of these types, the header will declare functions to convert
    between integer and floating point types, for easier (de)serialization:
@@ -53,6 +79,13 @@ float.h vales are defined:
 	efloat64 uint64_to_efloat64(uint64_t i)
 	uint64_t efloat64_to_uint64(efloat64 f)
 	int64_t efloat64_to_int64(efloat64 f)
+
+ * Because it is useful when comparing floats to know how close two values
+   are to each other, distance functions are defined which report the
+   number of representable floats between two values:
+
+	uint32_t efloat32_distance(efloat32 x, efloat32 y);
+	uint64_t efloat64_distance(efloat64 x, efloat64 y);
 
  * Additionally, an equivilent to the "fpclassify" function from math.h
    is provided:

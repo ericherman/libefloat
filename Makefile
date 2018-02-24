@@ -90,13 +90,17 @@ endif
 
 A_NAME=libefloat.a
 
-TEST_32_SRC=tests/test-round-trip-32.c
-TEST_32_OBJ=test-round-trip-32.o
-TEST_32_EXE=test-round-trip-32
+TEST_RT_32_SRC=tests/test-round-trip-32.c
+TEST_RT_32_OBJ=test-round-trip-32.o
+TEST_RT_32_EXE=test-round-trip-32
 
-TEST_64_SRC=tests/test-round-trip-64.c
-TEST_64_OBJ=test-round-trip-64.o
-TEST_64_EXE=test-round-trip-64
+TEST_RT_64_SRC=tests/test-round-trip-64.c
+TEST_RT_64_OBJ=test-round-trip-64.o
+TEST_RT_64_EXE=test-round-trip-64
+
+TEST_DIST_32_SRC=tests/test-distance-32.c
+TEST_DIST_32_OBJ=test-distance-32.o
+TEST_DIST_32_EXE=test-distance-32
 
 default: library
 
@@ -118,43 +122,52 @@ warn-if-fpclassify-mismatch: $(A_NAME) tests/warn-if-fpclassify-mismatch.c
 		-o warn-if-fpclassify-mismatch
 	./warn-if-fpclassify-mismatch
 
-$(TEST_32_OBJ): $(EFLT_LIB_HDR) $(TEST_32_SRC)
-	$(CC) -c $(TEST_CFLAGS) $(TEST_32_SRC) -o $(TEST_32_OBJ)
+$(TEST_RT_32_OBJ): $(EFLT_LIB_HDR) $(TEST_RT_32_SRC)
+	$(CC) -c $(TEST_CFLAGS) $(TEST_RT_32_SRC) -o $(TEST_RT_32_OBJ)
 
-$(TEST_32_EXE)-static: $(TEST_32_OBJ) $(A_NAME)
-	$(CC) $(TEST_32_OBJ) $(A_NAME) -o $(TEST_32_EXE)-static
+$(TEST_RT_32_EXE)-static: $(TEST_RT_32_OBJ) $(A_NAME)
+	$(CC) $(TEST_RT_32_OBJ) $(A_NAME) -o $(TEST_RT_32_EXE)-static
 
-$(TEST_32_EXE)-dynamic: $(TEST_32_OBJ) $(SO_NAME)
-	$(CC) $(TEST_32_OBJ) $(TEST_LDFLAGS) \
-		-o $(TEST_32_EXE)-dynamic $(TEST_LDADD)
+$(TEST_RT_32_EXE)-dynamic: $(TEST_RT_32_OBJ) $(SO_NAME)
+	$(CC) $(TEST_RT_32_OBJ) $(TEST_LDFLAGS) \
+		-o $(TEST_RT_32_EXE)-dynamic $(TEST_LDADD)
 
-check-32-static: $(TEST_32_EXE)-static warn-if-fpclassify-mismatch
-	./$(TEST_32_EXE)-static
+$(TEST_DIST_32_OBJ): $(EFLT_LIB_HDR) $(TEST_DIST_32_SRC)
+	$(CC) -c $(TEST_CFLAGS) $(TEST_DIST_32_SRC) -o $(TEST_DIST_32_OBJ)
 
-check-32-dynamic: $(TEST_32_EXE)-dynamic warn-if-fpclassify-mismatch
-	LD_LIBRARY_PATH=. ./$(TEST_32_EXE)-dynamic
+$(TEST_DIST_32_EXE)-dynamic: $(TEST_DIST_32_OBJ) $(SO_NAME)
+	$(CC) $(TEST_DIST_32_OBJ) $(TEST_LDFLAGS) \
+		-o $(TEST_DIST_32_EXE)-dynamic $(TEST_LDADD)
+
+check-32-static: $(TEST_RT_32_EXE)-static warn-if-fpclassify-mismatch
+	./$(TEST_RT_32_EXE)-static
+
+check-32-dynamic: $(TEST_RT_32_EXE)-dynamic $(TEST_DIST_32_EXE)-dynamic \
+	warn-if-fpclassify-mismatch
+	LD_LIBRARY_PATH=. ./$(TEST_RT_32_EXE)-dynamic
+	LD_LIBRARY_PATH=. ./$(TEST_DIST_32_EXE)-dynamic 0 4093
 
 check-32: check-32-static check-32-dynamic
 
 # this will check all 32bit values for round-trip success
-check-32-exhaustive: $(TEST_32_EXE)-static
-	time ./$(TEST_32_EXE)-static 1 1
+check-32-exhaustive: $(TEST_RT_32_EXE)-static
+	time ./$(TEST_RT_32_EXE)-static 1 1
 
-$(TEST_64_OBJ): $(EFLT_LIB_HDR) $(TEST_64_SRC)
-	$(CC) -c $(TEST_CFLAGS) $(TEST_64_SRC) -o $(TEST_64_OBJ)
+$(TEST_RT_64_OBJ): $(EFLT_LIB_HDR) $(TEST_RT_64_SRC)
+	$(CC) -c $(TEST_CFLAGS) $(TEST_RT_64_SRC) -o $(TEST_RT_64_OBJ)
 
-$(TEST_64_EXE)-static: $(TEST_64_OBJ) $(A_NAME)
-	$(CC) $(TEST_64_OBJ) $(A_NAME) -o $(TEST_64_EXE)-static
+$(TEST_RT_64_EXE)-static: $(TEST_RT_64_OBJ) $(A_NAME)
+	$(CC) $(TEST_RT_64_OBJ) $(A_NAME) -o $(TEST_RT_64_EXE)-static
 
-$(TEST_64_EXE)-dynamic: $(TEST_64_OBJ) $(SO_NAME)
-	$(CC) $(TEST_64_OBJ) $(TEST_LDFLAGS) \
-		-o $(TEST_64_EXE)-dynamic $(TEST_LDADD)
+$(TEST_RT_64_EXE)-dynamic: $(TEST_RT_64_OBJ) $(SO_NAME)
+	$(CC) $(TEST_RT_64_OBJ) $(TEST_LDFLAGS) \
+		-o $(TEST_RT_64_EXE)-dynamic $(TEST_LDADD)
 
-check-64-static: $(TEST_64_EXE)-static warn-if-fpclassify-mismatch
-	./$(TEST_64_EXE)-static
+check-64-static: $(TEST_RT_64_EXE)-static warn-if-fpclassify-mismatch
+	./$(TEST_RT_64_EXE)-static
 
-check-64-dynamic: $(TEST_64_EXE)-dynamic warn-if-fpclassify-mismatch
-	LD_LIBRARY_PATH=. ./$(TEST_64_EXE)-dynamic
+check-64-dynamic: $(TEST_RT_64_EXE)-dynamic warn-if-fpclassify-mismatch
+	LD_LIBRARY_PATH=. ./$(TEST_RT_64_EXE)-dynamic
 
 check-64: check-64-static check-64-dynamic
 
@@ -168,11 +181,11 @@ echo_makeflags:
 check: echo_makeflags check-32 check-64
 	@echo "success"
 
-valgrind-32: ./$(TEST_32_EXE)-static
-	valgrind ./$(TEST_32_EXE)-static
+valgrind-32: ./$(TEST_RT_32_EXE)-static
+	valgrind ./$(TEST_RT_32_EXE)-static
 
-valgrind-64: ./$(TEST_64_EXE)-static
-	valgrind ./$(TEST_64_EXE)-static
+valgrind-64: ./$(TEST_RT_64_EXE)-static
+	valgrind ./$(TEST_RT_64_EXE)-static
 
 valgrind: valgrind-32 valgrind-64
 

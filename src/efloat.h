@@ -49,6 +49,9 @@ extern "C" {
 #include <float.h>
 #endif
 
+/* maybe one day we will want RADIX != 2, but I doubt it */
+#define efloat32_radix 2
+
 #if ((!(defined efloat_float)) \
  && (FLT_MAX_EXP == 1024) \
  && (FLT_MANT_DIG == 53) \
@@ -95,36 +98,60 @@ extern "C" {
  && ((defined efloat_double) && (efloat_double == 64)))
 #define efloat64_exists 1
 typedef double efloat64;
+#define efloat64_max DBL_MAX
+#define efloat64_min DBL_MIN
+#define nextafter64(x,y) nextafter(x,y)
+#define nexttoward64(x,y) nexttoward(x,y)
 #endif
 
 #if (((!(defined efloat64_exists)) || (efloat64_exists == 0)) \
  && ((defined efloat_long_double) && (efloat_long_double == 64)))
 #define efloat64_exists 1
 typedef long double efloat64;
+#define efloat64_max LDBL_MAX
+#define efloat64_min LDBL_MIN
+#define nextafter32(x,y) nextafterl(x,y)
+#define nexttoward32(x,y) nexttowardl(x,y)
 #endif
 
 #if (((!(defined efloat64_exists)) || (efloat64_exists == 0)) \
  && ((defined efloat_float) && (efloat_float == 64)))
 #define efloat64_exists 1
 typedef float efloat64;
+#define efloat64_max FLT_MAX
+#define efloat64_min FLT_MIN
+#define nextafter64(x,y) nextafterf(x,y)
+#define nexttoward64(x,y) nexttowardf(x,y)
 #endif
 
 #if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
  && ((defined efloat_double) && (efloat_double == 32)))
 #define efloat32_exists 1
 typedef double efloat32;
+#define efloat32_max DBL_MAX
+#define efloat32_min DBL_MIN
+#define nextafter32(x,y) nextafter(x,y)
+#define nexttoward32(x,y) nexttoward(x,y)
 #endif
 
 #if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
  && ((defined efloat_float) && (efloat_float == 32)))
 #define efloat32_exists 1
 typedef float efloat32;
+#define efloat32_max FLT_MAX
+#define efloat32_min FLT_MIN
+#define nextafter32(x,y) nextafterf(x,y)
+#define nexttoward32(x,y) nexttowardf(x,y)
 #endif
 
 #if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
  && ((defined efloat_long_double) && (efloat_long_double == 32)))
 #define efloat32_exists 1
 typedef long double efloat32;
+#define efloat32_max LDBL_MAX
+#define efloat32_min LDBL_MIN
+#define nextafter32(x,y) nextafterl(x,y)
+#define nexttoward32(x,y) nexttowardl(x,y)
 #endif
 
 enum efloat_class {
@@ -149,8 +176,12 @@ struct efloat64_fields {
 
 #if ((defined efloat32_exists) && (efloat32_exists))
 #define efloat32_r2_exp_max 127
+#define efloat32_exp_max efloat32_r2_exp_max
 #define efloat32_r2_exp_min -127
+#define efloat32_exp_min efloat32_r2_exp_min
+#define efloat32_mant_dig 24
 #define efloat32_r2_exp_inf_nan 128
+#define efloat32_exp_inf_nan efloat32_r2_exp_inf_nan
 #define efloat32_r2_sign_mask 0x80000000UL
 #define efloat32_r2_rexp_mask 0x7F800000UL
 #define efloat32_r2_signif_mask 0x007FFFFFUL
@@ -160,22 +191,15 @@ struct efloat64_fields {
 #if ((defined efloat64_exists) && (efloat64_exists) \
  && (__SIZEOF_LONG__ >= 8))
 #define efloat64_r2_exp_max 1023L
+#define efloat64_exp_max efloat64_r2_exp_max
 #define efloat64_r2_exp_min -1023L
+#define efloat64_exp_min efloat64_r2_exp_min
+#define efloat64_mant_dig 53
 #define efloat64_r2_exp_inf_nan 1024L
+#define efloat64_exp_inf_nan efloat64_r2_exp_inf_nan
 #define efloat64_r2_sign_mask 0x8000000000000000UL
 #define efloat64_r2_rexp_mask 0x7FF0000000000000UL
 #define efloat64_r2_signif_mask 0x000FFFFFFFFFFFFFUL
-#define efloat64_r2_exp_shift 52
-#endif
-
-#if ((defined efloat64_exists) && (efloat64_exists) \
- && (__SIZEOF_LONG__ < 8 &&  __SIZEOF_LONG_LONG__ >= 8))
-#define efloat64_r2_exp_max 1023L
-#define efloat64_r2_exp_min -1023L
-#define efloat64_r2_exp_inf_nan 1024L
-#define efloat64_r2_sign_mask 0x8000000000000000ULL
-#define efloat64_r2_rexp_mask 0x7FF0000000000000ULL
-#define efloat64_r2_signif_mask 0x000FFFFFFFFFFFFFULL
 #define efloat64_r2_exp_shift 52
 #endif
 
@@ -191,6 +215,7 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields);
 efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
 				      enum efloat_class *efloat32class);
+uint32_t efloat32_distance(efloat32 x, efloat32 y);
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists))
@@ -205,6 +230,7 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields);
 efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 				      enum efloat_class *efloat64class);
+uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif
 
 #if (efloat_float == 32)
