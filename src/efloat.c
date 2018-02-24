@@ -139,7 +139,6 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields)
 {
 	uint32_t u32, raw_exp;
-
 	u32 = efloat32_to_uint32(f);
 
 	fields->sign = (u32 & efloat32_r2_sign_mask) ? 1U : 0U;
@@ -235,32 +234,39 @@ efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
 uint32_t efloat32_distance(efloat32 x, efloat32 y)
 {
 	uint32_t xu, yu;
-	enum efloat_class xc, yc;
-	uint8_t x_sign, y_sign;
-	struct efloat32_fields fields;
+	enum efloat_class x_fpclass, y_fpclass;
+	struct efloat32_fields x_fields, y_fields;
+
+	x_fields.sign = 0;
+	x_fields.exponent = 0;
+	x_fields.significand = 0;
+	x_fpclass = efloat32_radix_2_to_fields(x, &x_fields);
+
+	y_fields.sign = 0;
+	y_fields.exponent = 0;
+	y_fields.significand = 0;
+	y_fpclass = efloat32_radix_2_to_fields(y, &y_fields);
+
+	if (x_fpclass == ef_nan || y_fpclass == ef_nan) {
+		return UINT32_MAX;
+	}
+
+	if (x_fpclass == ef_inf || y_fpclass == ef_inf) {
+		if (x_fpclass == ef_inf && y_fpclass == ef_inf
+		    && x_fields.sign == y_fields.sign) {
+			return 0;
+		}
+		return UINT32_MAX;
+	}
 
 	if (x == y) {
 		return 0;
 	}
 
-	fields.sign = 0;
-	fields.exponent = 0;
-	fields.significand = 0;
+	xu = efloat32_to_uint32(x_fields.sign ? -x : x);
+	yu = efloat32_to_uint32(y_fields.sign ? -y : y);
 
-	xc = efloat32_radix_2_to_fields(x, &fields);
-	x_sign = fields.sign;
-
-	yc = efloat32_radix_2_to_fields(y, &fields);
-	y_sign = fields.sign;
-
-	if (xc == ef_nan || yc == ef_nan) {
-		return UINT32_MAX;
-	}
-
-	xu = efloat32_to_uint32(x_sign ? -x : x);
-	yu = efloat32_to_uint32(y_sign ? -y : y);
-
-	if (x_sign == y_sign) {
+	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;
 	}
 
@@ -453,32 +459,39 @@ efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 uint64_t efloat64_distance(efloat64 x, efloat64 y)
 {
 	uint64_t xu, yu;
-	enum efloat_class xc, yc;
-	struct efloat64_fields fields;
-	uint8_t x_sign, y_sign;
+	enum efloat_class x_fpclass, y_fpclass;
+	struct efloat64_fields x_fields, y_fields;
+
+	x_fields.sign = 0;
+	x_fields.exponent = 0;
+	x_fields.significand = 0;
+	x_fpclass = efloat64_radix_2_to_fields(x, &x_fields);
+
+	y_fields.sign = 0;
+	y_fields.exponent = 0;
+	y_fields.significand = 0;
+	y_fpclass = efloat64_radix_2_to_fields(y, &y_fields);
+
+	if (x_fpclass == ef_nan || y_fpclass == ef_nan) {
+		return UINT64_MAX;
+	}
+
+	if (x_fpclass == ef_inf || y_fpclass == ef_inf) {
+		if (x_fpclass == ef_inf && y_fpclass == ef_inf
+		    && x_fields.sign == y_fields.sign) {
+			return 0;
+		}
+		return UINT64_MAX;
+	}
 
 	if (x == y) {
 		return 0;
 	}
 
-	fields.sign = 0;
-	fields.exponent = 0;
-	fields.significand = 0;
+	xu = efloat64_to_uint64(x_fields.sign ? -x : x);
+	yu = efloat64_to_uint64(y_fields.sign ? -y : y);
 
-	xc = efloat64_radix_2_to_fields(x, &fields);
-	x_sign = fields.sign;
-
-	yc = efloat64_radix_2_to_fields(y, &fields);
-	y_sign = fields.sign;
-
-	if (xc == ef_nan || yc == ef_nan) {
-		return UINT64_MAX;
-	}
-
-	xu = efloat64_to_uint64(x_sign ? -x : x);
-	yu = efloat64_to_uint64(y_sign ? -y : y);
-
-	if (x_sign == y_sign) {
+	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;
 	}
 

@@ -145,7 +145,7 @@ check-32-static: $(TEST_RT_32_EXE)-static warn-if-fpclassify-mismatch
 check-32-dynamic: $(TEST_RT_32_EXE)-dynamic $(TEST_DIST_32_EXE)-dynamic \
 	warn-if-fpclassify-mismatch
 	LD_LIBRARY_PATH=. ./$(TEST_RT_32_EXE)-dynamic
-	LD_LIBRARY_PATH=. ./$(TEST_DIST_32_EXE)-dynamic 0 4093
+	LD_LIBRARY_PATH=. ./$(TEST_DIST_32_EXE)-dynamic
 
 check-32: check-32-static check-32-dynamic
 
