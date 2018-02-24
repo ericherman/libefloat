@@ -1,5 +1,5 @@
 /*
-test-distance-32.c: quick test for the Embedable Float manipulation library
+test-distance-64.c: quick test for the Embedable Float manipulation library
 Copyright (C) 2017 Eric Herman
 
 https://github.com/ericherman/libefloat
@@ -19,17 +19,17 @@ version.
 #include <stdlib.h>
 #include <math.h>
 
-int check_efloat32_distance(efloat32 x, efloat32 y, uint32_t expect,
+int check_efloat64_distance(efloat64 x, efloat64 y, uint64_t expect,
 			    int verbose)
 {
-	uint32_t xi, yi, distance;
+	uint64_t xi, yi, distance;
 	int err;
 
-	distance = efloat32_distance(x, y);
+	distance = efloat64_distance(x, y);
 	err = (distance == expect) ? 0 : 1;
 	if (err || verbose > 1) {
-		xi = efloat32_to_int32(x);
-		yi = efloat32_to_int32(y);
+		xi = efloat64_to_int64(x);
+		yi = efloat64_to_int64(y);
 		fprintf(stderr,
 			"%g (%ld), %g (%ld), reports distance of %lu,"
 			" expected %lu\n", (double)x, (long)xi, (double)y,
@@ -39,11 +39,11 @@ int check_efloat32_distance(efloat32 x, efloat32 y, uint32_t expect,
 	return err;
 }
 
-uint64_t check_efloat32_between(efloat32 from, efloat32 until, size_t step,
+uint64_t check_efloat64_between(efloat64 from, efloat64 until, size_t step,
 				int verbose, uint64_t *cnt)
 {
 	size_t i;
-	efloat32 f, n, na;
+	efloat64 f, n, na;
 	int out_of_bounds;
 	uint64_t err;
 
@@ -56,7 +56,7 @@ uint64_t check_efloat32_between(efloat32 from, efloat32 until, size_t step,
 		++(*cnt);
 		n = f;
 		for (i = 0; i < step; ++i) {
-			na = nextafter32(n, until);
+			na = nextafter64(n, until);
 			if (na == n) {
 				out_of_bounds = 1;
 			} else {
@@ -67,7 +67,7 @@ uint64_t check_efloat32_between(efloat32 from, efloat32 until, size_t step,
 			out_of_bounds = 1;
 		}
 		if (!out_of_bounds) {
-			err += check_efloat32_distance(f, n, step, verbose);
+			err += check_efloat64_distance(f, n, step, verbose);
 		}
 	}
 	return err;
@@ -76,7 +76,7 @@ uint64_t check_efloat32_between(efloat32 from, efloat32 until, size_t step,
 int main(int argc, char **argv)
 {
 	size_t i, step;
-	efloat32 mark;
+	efloat64 mark;
 	uint64_t err, cnt_0_to_mark, cnt;
 	int verbose, argstep;
 
@@ -87,42 +87,42 @@ int main(int argc, char **argv)
 	cnt = 0;
 
 	step = 1;
-	err += check_efloat32_distance(0.0, sqrt(-1), UINT32_MAX, verbose);
-	err += check_efloat32_distance(sqrt(-1), sqrt(-1), UINT32_MAX, verbose);
+	err += check_efloat64_distance(0.0, sqrt(-1), UINT64_MAX, verbose);
+	err += check_efloat64_distance(sqrt(-1), sqrt(-1), UINT64_MAX, verbose);
 	err +=
-	    check_efloat32_distance(sqrt(-1), -(sqrt(-1)), UINT32_MAX, verbose);
-	err += check_efloat32_distance(INFINITY, INFINITY, 0, verbose);
-	err += check_efloat32_distance(-INFINITY, -INFINITY, 0, verbose);
+	    check_efloat64_distance(sqrt(-1), -(sqrt(-1)), UINT64_MAX, verbose);
+	err += check_efloat64_distance(INFINITY, INFINITY, 0, verbose);
+	err += check_efloat64_distance(-INFINITY, -INFINITY, 0, verbose);
 	err +=
-	    check_efloat32_distance(INFINITY, -INFINITY, UINT32_MAX, verbose);
+	    check_efloat64_distance(INFINITY, -INFINITY, UINT64_MAX, verbose);
 	if (err) {
 		exit(EXIT_FAILURE);
 	}
-	mark = efloat32_min;
+	mark = efloat64_min;
 	for (i = 0; i < 10; ++i) {
-		mark = nextafter(mark, efloat32_max);
+		mark = nextafter(mark, efloat64_max);
 	}
 	if (verbose
-	    || labs(efloat32_to_int32(mark) - efloat32_to_int32(0.0)) >
+	    || labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)) >
 	    10 * 1000 * 1000) {
 		fprintf(stderr, "%g (%ld), %g (%ld), difference = %ld?\n",
-			(double)mark, (long)efloat32_to_int32(mark),
-			(double)0.0, (long)efloat32_to_int32(0.0),
-			labs(efloat32_to_int32(mark) - efloat32_to_int32(0.0)));
-		mark = nextafter(0.0, efloat32_max);
+			(double)mark, (long)efloat64_to_int64(mark),
+			(double)0.0, (long)efloat64_to_int64(0.0),
+			labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)));
+		mark = nextafter(0.0, efloat64_max);
 		for (i = 0; i < 10; ++i) {
-			mark = nextafter(mark, efloat32_max);
+			mark = nextafter(mark, efloat64_max);
 		}
 		fprintf(stderr, "using %g (%ld) instead\n", mark,
-			(long)efloat32_to_int32(mark));
+			(long)efloat64_to_int64(mark));
 		fprintf(stderr, "%g (%ld), %g (%ld), difference = %ld\n",
-			(double)mark, (long)efloat32_to_int32(mark),
-			(double)0.0, (long)efloat32_to_int32(0.0),
-			labs(efloat32_to_int32(mark) - efloat32_to_int32(0.0)));
+			(double)mark, (long)efloat64_to_int64(mark),
+			(double)0.0, (long)efloat64_to_int64(0.0),
+			labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)));
 	}
 
-	err += check_efloat32_between(0.0, mark, step, verbose, &cnt_0_to_mark);
-	err += check_efloat32_between(0.0, -mark, step, verbose, &cnt);
+	err += check_efloat64_between(0.0, mark, step, verbose, &cnt_0_to_mark);
+	err += check_efloat64_between(0.0, -mark, step, verbose, &cnt);
 	if (cnt_0_to_mark != cnt) {
 		++err;
 		fprintf(stderr, "iterations between 0.0 and +mark = %llu\n",
@@ -130,15 +130,15 @@ int main(int argc, char **argv)
 		fprintf(stderr, "iterations between 0.0 and -mark = %llu\n",
 			(unsigned long long)cnt);
 	}
-	err += check_efloat32_distance(0.0, mark, cnt_0_to_mark, verbose);
-	err += check_efloat32_distance(0.0, -mark, cnt_0_to_mark, verbose);
+	err += check_efloat64_distance(0.0, mark, cnt_0_to_mark, verbose);
+	err += check_efloat64_distance(0.0, -mark, cnt_0_to_mark, verbose);
 	err +=
-	    check_efloat32_distance(-mark, mark, (2 * cnt_0_to_mark), verbose);
+	    check_efloat64_distance(-mark, mark, (2 * cnt_0_to_mark), verbose);
 
 	step = argstep > 0 ? (size_t)argstep : 0;
 	if (step) {
 		err +=
-		    check_efloat32_between(-efloat32_max, efloat32_max, step,
+		    check_efloat64_between(-efloat64_max, efloat64_max, step,
 					   verbose, &cnt);
 	}
 

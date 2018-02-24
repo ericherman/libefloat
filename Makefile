@@ -102,6 +102,10 @@ TEST_DIST_32_SRC=tests/test-distance-32.c
 TEST_DIST_32_OBJ=test-distance-32.o
 TEST_DIST_32_EXE=test-distance-32
 
+TEST_DIST_64_SRC=tests/test-distance-64.c
+TEST_DIST_64_OBJ=test-distance-64.o
+TEST_DIST_64_EXE=test-distance-64
+
 default: library
 
 $(EFLT_LIB_OBJ): $(EFLT_LIB_HDR) $(EFLT_LIB_SRC)
@@ -152,6 +156,7 @@ check-32: check-32-static check-32-dynamic
 # this will check all 32bit values for round-trip success
 check-32-exhaustive: $(TEST_RT_32_EXE)-static
 	time ./$(TEST_RT_32_EXE)-static 1 1
+	time LD_LIBRARY_PATH=. ./$(TEST_DIST_32_EXE)-dynamic 0 1
 
 $(TEST_RT_64_OBJ): $(EFLT_LIB_HDR) $(TEST_RT_64_SRC)
 	$(CC) -c $(TEST_CFLAGS) $(TEST_RT_64_SRC) -o $(TEST_RT_64_OBJ)
@@ -163,11 +168,20 @@ $(TEST_RT_64_EXE)-dynamic: $(TEST_RT_64_OBJ) $(SO_NAME)
 	$(CC) $(TEST_RT_64_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_RT_64_EXE)-dynamic $(TEST_LDADD)
 
+$(TEST_DIST_64_OBJ): $(EFLT_LIB_HDR) $(TEST_DIST_64_SRC)
+	$(CC) -c $(TEST_CFLAGS) $(TEST_DIST_64_SRC) -o $(TEST_DIST_64_OBJ)
+
+$(TEST_DIST_64_EXE)-dynamic: $(TEST_DIST_64_OBJ) $(SO_NAME)
+	$(CC) $(TEST_DIST_64_OBJ) $(TEST_LDFLAGS) \
+		-o $(TEST_DIST_64_EXE)-dynamic $(TEST_LDADD)
+
 check-64-static: $(TEST_RT_64_EXE)-static warn-if-fpclassify-mismatch
 	./$(TEST_RT_64_EXE)-static
 
-check-64-dynamic: $(TEST_RT_64_EXE)-dynamic warn-if-fpclassify-mismatch
+check-64-dynamic: $(TEST_RT_64_EXE)-dynamic $(TEST_DIST_64_EXE)-dynamic \
+	warn-if-fpclassify-mismatch
 	LD_LIBRARY_PATH=. ./$(TEST_RT_64_EXE)-dynamic
+	LD_LIBRARY_PATH=. ./$(TEST_DIST_64_EXE)-dynamic
 
 check-64: check-64-static check-64-dynamic
 
