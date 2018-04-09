@@ -21,6 +21,10 @@ float64 1 [63]	11 [62-52]	52 [51-00]
 float64 SEEEEEEE EEEEMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM
 https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 
+See also:
+https://en.wikipedia.org/wiki/IEEE_754-1985
+https://en.wikipedia.org/wiki/IEEE_754-2008
+
 
 Overview
 --------
