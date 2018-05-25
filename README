@@ -141,17 +141,32 @@ float.h vales are defined:
 		(unsigned long)fields.significand);
 
 
+Building
+--------
+The included Makefile shows an exaple; try "make check"
+
+
 Usage
 -----
+
+A simple demo is included:
+
+~/src/libefloat$ make demo && ./libefloat-demo
+double: 0.333333 => uint64_t: 3fd5555555555555
+uint64_t: 3fd5555555555555 => double: 0.333333
+float: 0.333333 => uint32_t: 3eaaaaab
+uint32_t: 3eaaaaab => float: 0.333333
+~/src/libefloat$
+~/src/libefloat$ ./libefloat-demo -0.0
+double: -0 => uint64_t: 8000000000000000
+uint64_t: 8000000000000000 => double: -0
+float: -0 => uint32_t: 80000000
+uint32_t: 80000000 => float: -0
+~/src/libefloat$
 
 The "tests" directory contains examples which shows round trip conversion
 between integer and floating point types, as well as comparing to the host
 platform's math.h version of fpclassify.
-
-
-Building
---------
-The included Makefile shows an exaple; try "make check"
 
 
 License

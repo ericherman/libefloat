@@ -106,6 +106,9 @@ TEST_DIST_64_SRC=tests/test-distance-64.c
 TEST_DIST_64_OBJ=test-distance-64.o
 TEST_DIST_64_EXE=test-distance-64
 
+TEST_DEMO_SRC=demo/libefloat-demo.c
+TEST_DEMO_EXE=libefloat-demo
+
 default: library
 
 $(EFLT_LIB_OBJ): $(EFLT_LIB_HDR) $(EFLT_LIB_SRC)
@@ -203,6 +206,15 @@ valgrind-64: ./$(TEST_RT_64_EXE)-static
 
 valgrind: valgrind-32 valgrind-64
 
+demo: $(A_NAME) $(EFLT_LIB_HDR) $(TEST_DEMO_SRC)
+	$(CC) $(TEST_CFLAGS) $(TEST_DEMO_SRC) $(A_NAME) -o $(TEST_DEMO_EXE)
+	./$(TEST_DEMO_EXE) 1
+	./$(TEST_DEMO_EXE) 0.5
+	./$(TEST_DEMO_EXE) 0.0
+	./$(TEST_DEMO_EXE) -0.0
+	./$(TEST_DEMO_EXE) 0.1
+	./$(TEST_DEMO_EXE) -0.00004211
+
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0
 
@@ -213,7 +225,7 @@ tidy:
 		-T FILE -T size_t -T ssize_t \
 		-T uint8_t -T uint16_t -T uint32_t -T uint64_t \
 		-T int8_t -T int16_t -T int32_t -T int64_t \
-		`find src tests -name '*.h' -o -name '*.c'`
+		`find src tests demo -name '*.h' -o -name '*.c'`
 	patch -Rp1 -i misc/pre-tidy.patch
 
 spotless:

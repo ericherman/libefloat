@@ -5,6 +5,7 @@ test-round-trip-64-static
 test-distance-32-dynamic
 test-distance-64-dynamic
 warn-if-fpclassify-mismatch
+libefloat-demo
 
 ###################
 # backup files
