@@ -6,6 +6,8 @@ test-distance-32-dynamic
 test-distance-64-dynamic
 warn-if-fpclassify-mismatch
 libefloat-demo
+u32-to-f32
+u64-to-f64
 
 ###################
 # backup files
