@@ -27,7 +27,7 @@ for my $val (@$vals) {
 exit 0;
 
 sub int_to_float_vals_to_check {
-    my ( $significand_bits, $exponent_bits ) = @_;
+    my ( $exponent_bits, $significand_bits ) = @_;
 
     # hard-code to the variance to the top 2 and bottom 2 bits always
     my $significands = bitvals_to_test( $significand_bits, 0, 1, 1 );
