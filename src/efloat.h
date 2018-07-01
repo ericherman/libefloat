@@ -20,10 +20,37 @@ float32 1 [31]	8 [30-23]	23 [22-00]
 float32 SEEEEEEE EMMMMMMM MMMMMMMM MMMMMMMM
 https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 
+	int sign, exponent;
+	uint32_t significand;
+
+	sign = ((bits >> 31) == 0) ? 1 : -1;
+	exponent = ((bits >> 23) & 0xff);
+	significand = (e == 0) ? (bits & 0x7fffff) << 1
+	                       : (bits & 0x7fffff) | 0x800000;
+
+
 float64 Sign	Exponent	Significand (mantissa)
 float64 1 [63]	11 [62-52]	52 [51-00]
 float64 SEEEEEEE EEEEMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMMMMM
 https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+
+	int sign, exponent;
+	uint64_t significand;
+
+	sign = ((bits >> 63) == 0) ? 1 : -1;
+	exponent = (int)((bits >> 52) & 0x7ffL);
+	significand = (e == 0) ? (bits & 0xfffffffffffffL) << 1
+	                       : (bits & 0xfffffffffffffL) | 0x10000000000000L;
+
+See also:
+https://en.wikipedia.org/wiki/IEEE_754-1985
+https://en.wikipedia.org/wiki/IEEE_754-2008
+
+https://docs.oracle.com/javase/7/docs/api/java/lang/Float.html#floatToIntBits(float)
+https://docs.oracle.com/javase/7/docs/api/java/lang/Float.html#intBitsToFloat(int)
+https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#DoubleToLongBits(double)
+https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#longBitsToDouble(long)
+
 */
 
 #ifndef EFLOAT_H
