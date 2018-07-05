@@ -110,7 +110,7 @@ float.h vales are defined:
  * Functions for extracting infromation from the float are provided:
 
 	struct efloat32_fields {
-		uint8_t sign;
+		int8_t sign;
 		int16_t exponent;
 		uint32_t significand;
 	};
@@ -123,7 +123,7 @@ float.h vales are defined:
 
  * There are #defines which allow for slightly easier platform independent code:
 
-	double d = -123.0/0.5;
+	double d = -123.0/2.5;
 
 	#if (efloat_double == 64)
 	uint64_t u = efloat64_to_uint64_bits(d);
