@@ -80,7 +80,7 @@ float.h vales are defined:
    between integer and floating point types, for easier (de)serialization:
 
 	efloat64  int64_bits_to_efloat64(int64_t i)
-	efloat64 uint64_bits_to_efloat64(uint64_t i)
+	efloat64 uint64_bits_to_efloat64(uint64_t u)
 
 	uint64_t efloat64_to_uint64_bits(efloat64 f)
 	int64_t  efloat64_to_int64_bits(efloat64 f)
@@ -116,10 +116,10 @@ float.h vales are defined:
 	};
 
 	enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
-	                              struct efloat32_fields *fields);
+	                                      struct efloat32_fields *fields);
 
 	efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
-	                                     enum efloat_class *efloat32class);
+	                                      enum efloat_class *efloat32class);
 
  * There are #defines which allow for slightly easier platform independent code:
 
