@@ -1,6 +1,6 @@
 --- orig/src/efloat.h
 +++ tidy/src/efloat.h
-@@ -29,9 +29,11 @@
+@@ -57,9 +57,11 @@
  #ifndef EFLOAT_H
  #define EFLOAT_H
  
@@ -12,7 +12,7 @@
  
  #if HAVE_CONFIG_H
  #include <config.h>
-@@ -257,8 +259,10 @@
+@@ -285,8 +287,10 @@
  #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
  #endif
  
