@@ -25,9 +25,9 @@ https://en.wikipedia.org/wiki/Single-precision_floating-point_format
 
 	sign = ((bits >> 31) == 0) ? 1 : -1;
 	exponent = ((bits >> 23) & 0xff);
-	significand = (e == 0) ? (bits & 0x7fffff) << 1
-	                       : (bits & 0x7fffff) | 0x800000;
-
+	significand = (exponent == 0)
+                    ? (bits & 0x7fffff) << 1
+                    : (bits & 0x7fffff) | 0x800000;
 
 float64 Sign	Exponent	Significand (mantissa)
 float64 1 [63]	11 [62-52]	52 [51-00]
@@ -39,8 +39,9 @@ https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 
 	sign = ((bits >> 63) == 0) ? 1 : -1;
 	exponent = (int)((bits >> 52) & 0x7ffL);
-	significand = (e == 0) ? (bits & 0xfffffffffffffL) << 1
-	                       : (bits & 0xfffffffffffffL) | 0x10000000000000L;
+	significand = (exponent == 0)
+                    ? (bits & 0xfffffffffffffL) << 1
+                    : (bits & 0xfffffffffffffL) | 0x10000000000000L;
 
 See also:
 https://en.wikipedia.org/wiki/IEEE_754-1985
@@ -190,13 +191,13 @@ enum efloat_class {
 };
 
 struct efloat32_fields {
-	uint8_t sign;
+	int8_t sign;
 	int16_t exponent;
 	uint32_t significand;
 };
 
 struct efloat64_fields {
-	uint8_t sign;
+	int8_t sign;
 	int16_t exponent;
 	uint64_t significand;
 };
@@ -240,7 +241,7 @@ int32_t efloat32_to_int32(efloat32 f);
 enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields);
-efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
+efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 				      enum efloat_class *efloat32class);
 uint32_t efloat32_distance(efloat32 x, efloat32 y);
 #endif
@@ -255,7 +256,7 @@ int64_t efloat64_to_int64(efloat64 f);
 enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields);
-efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
+efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 				      enum efloat_class *efloat64class);
 uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif

@@ -138,19 +138,23 @@ enum efloat_class efloat32_classify(efloat32 f)
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields)
 {
-	uint32_t u32, raw_exp;
+	uint32_t u32, raw_significand;
+	int32_t raw_exp;
 	u32 = efloat32_to_uint32(f);
 
-	fields->sign = (u32 & efloat32_r2_sign_mask) ? 1U : 0U;
+	fields->sign = (u32 & efloat32_r2_sign_mask) ? -1 : 1;
 
 	raw_exp = (u32 & efloat32_r2_rexp_mask);
 	raw_exp = (raw_exp >> efloat32_r2_exp_shift);
 	fields->exponent = (raw_exp - efloat32_r2_exp_max);
 
-	fields->significand = u32 & efloat32_r2_signif_mask;
+	raw_significand = (u32 & efloat32_r2_signif_mask);
+	fields->significand = (fields->exponent == 0)
+	    ? (raw_significand << 1)
+	    : (raw_significand | (efloat32_r2_signif_mask + 1));
 
 	if (fields->exponent == efloat32_r2_exp_inf_nan) {
-		if (fields->significand) {
+		if (raw_significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -159,8 +163,7 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 		}
 	}
 
-	if ((fields->significand == 0)
-	    && (fields->exponent == efloat32_r2_exp_min)) {
+	if ((raw_significand == 0) && (fields->exponent == efloat32_r2_exp_min)) {
 		/* zero or -zero */
 		return ef_zero;
 	}
@@ -173,36 +176,40 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 	return ef_normal;
 }
 
-efloat32 efloat32_radix_2_from_fields(struct efloat32_fields fields,
+efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 				      enum efloat_class *efloat32class)
 {
 	efloat32 f;
-	uint32_t u32, raw_exp;
+	uint8_t raw_sign;
+	int32_t raw_exp;
+	uint32_t u32, raw_significand;
 	struct efloat32_fields f2;
 	int err;
 
 	err = 0;
-	f2.sign = fields.sign ? 1 : 0;
+	raw_sign = fields.sign < 0 ? 1 : 0;
 
-	if (fields.exponent > efloat32_r2_exp_inf_nan
-	    || fields.exponent < efloat32_r2_exp_min) {
+	raw_exp = fields.exponent;
+	if (raw_exp > efloat32_r2_exp_inf_nan || raw_exp < efloat32_r2_exp_min) {
 		seterrnoinval();
 		err = 1;
-		fields.exponent = efloat32_r2_exp_inf_nan;
+		raw_exp = efloat32_r2_exp_inf_nan;
 	}
-	raw_exp = (fields.exponent + efloat32_r2_exp_max);
+	raw_exp = (raw_exp + efloat32_r2_exp_max);
 
-	if (fields.significand !=
-	    (fields.significand & efloat32_r2_signif_mask)) {
+	raw_significand = (fields.exponent == 0)
+	    ? (fields.significand >> 1)
+	    : (fields.significand);
+
+	if (raw_significand != (raw_significand & efloat32_r2_signif_mask)) {
 		seterrnoinval();
 		err = 1;
-		fields.significand =
-		    (fields.significand & efloat32_r2_signif_mask);
+		raw_significand = (raw_significand & efloat32_r2_signif_mask);
 	}
 
-	u32 = (fields.sign ? efloat32_r2_sign_mask : 0)
+	u32 = (raw_sign ? efloat32_r2_sign_mask : 0)
 	    | (raw_exp << efloat32_r2_exp_shift)
-	    | fields.significand;
+	    | (raw_significand);
 
 	f = uint32_to_efloat32(u32);
 	if (efloat32class) {
@@ -263,8 +270,8 @@ uint32_t efloat32_distance(efloat32 x, efloat32 y)
 		return 0;
 	}
 
-	xu = efloat32_to_uint32(x_fields.sign ? -x : x);
-	yu = efloat32_to_uint32(y_fields.sign ? -y : y);
+	xu = efloat32_to_uint32(x_fields.sign < 0 ? -x : x);
+	yu = efloat32_to_uint32(y_fields.sign < 0 ? -y : y);
 
 	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;
@@ -362,20 +369,23 @@ enum efloat_class efloat64_classify(efloat64 f)
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields)
 {
-	uint64_t u64, raw_exp;
+	uint64_t u64, raw_exp, raw_significand;
 
 	u64 = efloat64_to_uint64(f);
 
-	fields->sign = (u64 & efloat64_r2_sign_mask) ? 1U : 0U;
+	fields->sign = (u64 & efloat64_r2_sign_mask) ? -1 : 1;
 
 	raw_exp = (u64 & efloat64_r2_rexp_mask);
 	raw_exp = (raw_exp >> efloat64_r2_exp_shift);
 	fields->exponent = (raw_exp - efloat64_r2_exp_max);
 
-	fields->significand = u64 & efloat64_r2_signif_mask;
+	raw_significand = u64 & efloat64_r2_signif_mask;
+	fields->significand = (fields->exponent == 0)
+	    ? raw_significand << 1
+	    : raw_significand | (efloat64_r2_signif_mask + 1);
 
 	if (fields->exponent == efloat64_r2_exp_inf_nan) {
-		if (fields->significand) {
+		if (raw_significand) {
 			/* +/- nan */
 			return ef_nan;
 		} else {
@@ -384,7 +394,7 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 		}
 	}
 
-	if ((fields->significand == 0)
+	if ((raw_significand == 0)
 	    && (fields->exponent == efloat64_r2_exp_min)) {
 		/* zero or -zero */
 		return ef_zero;
@@ -398,36 +408,40 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 	return ef_normal;
 }
 
-efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
+efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 				      enum efloat_class *efloat64class)
 {
 	efloat64 f;
-	uint64_t u64, raw_exp;
+	uint8_t raw_sign;
+	int64_t raw_exp;
+	uint64_t u64, raw_significand;
 	struct efloat64_fields f2;
 	int err;
 
 	err = 0;
-	f2.sign = fields.sign ? 1 : 0;
+	raw_sign = fields.sign < 0 ? 1 : 0;
 
-	if (fields.exponent > efloat64_r2_exp_inf_nan
-	    || fields.exponent < efloat64_r2_exp_min) {
+	raw_exp = fields.exponent;
+	if (raw_exp > efloat64_r2_exp_inf_nan || raw_exp < efloat64_r2_exp_min) {
 		seterrnoinval();
 		err = 1;
-		fields.exponent = efloat64_r2_exp_inf_nan;
+		raw_exp = efloat64_r2_exp_inf_nan;
 	}
-	raw_exp = (fields.exponent + efloat64_r2_exp_max);
+	raw_exp = (raw_exp + efloat64_r2_exp_max);
 
-	if (fields.significand !=
-	    (fields.significand & efloat64_r2_signif_mask)) {
+	raw_significand = (fields.exponent == 0)
+	    ? (fields.significand >> 1)
+	    : (fields.significand);
+
+	if (raw_significand != (raw_significand & efloat64_r2_signif_mask)) {
 		seterrnoinval();
 		err = 1;
-		fields.significand =
-		    (fields.significand & efloat64_r2_signif_mask);
+		raw_significand = (raw_significand & efloat64_r2_signif_mask);
 	}
 
-	u64 = (fields.sign ? efloat64_r2_sign_mask : 0)
+	u64 = (raw_sign ? efloat64_r2_sign_mask : 0)
 	    | (raw_exp << efloat64_r2_exp_shift)
-	    | fields.significand;
+	    | (raw_significand);
 
 	f = uint64_to_efloat64(u64);
 	if (efloat64class) {
@@ -450,7 +464,7 @@ efloat64 efloat64_radix_2_from_fields(struct efloat64_fields fields,
 			seterrnoinval();
 			eprintf2("significand %lu != %lu\n",
 				 (unsigned long)fields.significand,
-				 (unsigned long)f2.significand);
+				 (unsigned long)fields.significand);
 		}
 	}
 	return f;
@@ -488,8 +502,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y)
 		return 0;
 	}
 
-	xu = efloat64_to_uint64(x_fields.sign ? -x : x);
-	yu = efloat64_to_uint64(y_fields.sign ? -y : y);
+	xu = efloat64_to_uint64(x_fields.sign < 0 ? -x : x);
+	yu = efloat64_to_uint64(y_fields.sign < 0 ? -y : y);
 
 	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;
