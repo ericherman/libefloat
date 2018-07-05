@@ -28,20 +28,20 @@ exit 0;
 
 sub int_to_float_vals_to_check {
     my ( $exponent_bits, $significand_bits ) = @_;
-
     # hard-code to the variance to the top 2 and bottom 2 bits always
     my $significands = bitvals_to_test( $significand_bits, 0, 1, 1 );
-    my $exponents = bitvals_to_test( $exponent_bits, $significand_bits, 2, 3 );
-    my $signs = [ 0, ( 0x01 << ( $significand_bits + $exponent_bits ) ) ];
-    my @vals;
+    my $exponents = bitvals_to_test( $exponent_bits, $significand_bits, 1, 1 );
+    my $signs = [ 0x00, (0x01 << ($exponent_bits + $significand_bits)) ];
+    my $vals;
     for my $significand (@$significands) {
         for my $exp (@$exponents) {
             for my $sign (@$signs) {
-                push @vals, ( $sign + $exp + $significand );
+		my $val = $sign + $exp + $significand;
+                $vals->{$val} = undef;
             }
         }
     }
-    return [ sort { $a <=> $b } @vals ];
+    return [ sort { $a <=> $b } keys %$vals ];
 }
 
 sub bitvals_to_test {

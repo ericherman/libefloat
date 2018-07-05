@@ -30,6 +30,8 @@ version.
 int parse_and_print_u32_to_f32(const char *str, int base)
 {
 	uint32_t u32;
+	int32_t i32;
+	float f32;
 	int saved_err;
 
 	errno = 0;
@@ -40,8 +42,13 @@ int parse_and_print_u32_to_f32(const char *str, int base)
 		       strerror(saved_err), str, base);
 		return 1;
 	}
-
-	printf("%lu : %1.*e\n", (unsigned long)u32, DECIMAL_DIG, (double) uint32_to_efloat32(u32));
+	i32 = (int32_t)u32;
+	f32 = uint32_to_efloat32(u32);
+	/*
+	printf("%u : %d : %1.*e\n", (unsigned)u32, (int)i32,
+	       DECIMAL_DIG, f32);
+	*/
+	printf("%u : %d : %g\n", (unsigned)u32, (int)i32, f32);
 	return 0;
 }
 

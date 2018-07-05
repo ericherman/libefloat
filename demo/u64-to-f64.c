@@ -41,7 +41,8 @@ int parse_and_print_u64_to_f64(const char *str, int base)
 		return 1;
 	}
 
-	printf("%lu : %1.*e\n", (unsigned long)u64, DECIMAL_DIG, (double) uint64_to_efloat64(u64));
+	printf("%lu : %ld : %1.*e\n", (unsigned long)u64, (long)u64,
+	       DECIMAL_DIG, (double)uint64_to_efloat64(u64));
 	return 0;
 }
 
