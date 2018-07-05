@@ -83,14 +83,14 @@ unsigned efloat64_round_trip(efloat64 f)
 	check_fpclassify(cls, f);
 
 	f2 = efloat64_radix_2_from_fields(fields, &cls2);
-	if (efloat64_to_uint64(f2) == efloat64_to_uint64(f)) {
+	if (efloat64_to_uint64_bits(f2) == efloat64_to_uint64_bits(f)) {
 		return 0;
 	}
 
 	efloat64_radix_2_to_fields(f2, &fields2);
 	fprintf(stderr, "%g (%llu) != %g (%llu)\n",
-		f2, (unsigned long long)efloat64_to_uint64(f2),
-		f, (unsigned long long)efloat64_to_uint64(f));
+		f2, (unsigned long long)efloat64_to_uint64_bits(f2),
+		f, (unsigned long long)efloat64_to_uint64_bits(f));
 	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f,
 		fields.sign, fields.exponent,
 		(unsigned long long)fields.significand);
@@ -109,12 +109,12 @@ int uint64_efloat64_round_trip(uint64_t u)
 	int err;
 	uint64_t u2;
 	efloat64 f;
-	f = uint64_to_efloat64(u);
+	f = uint64_bits_to_efloat64(u);
 	err = efloat64_round_trip(f);
 	if (err) {
 		return 1;
 	}
-	u2 = efloat64_to_uint64(f);
+	u2 = efloat64_to_uint64_bits(f);
 
 	if ((FP_NAN != fpclassify(f)) && (u != u2)) {
 		fprintf(stderr,
@@ -136,13 +136,13 @@ int int64_efloat64_round_trip(int64_t i)
 	int64_t i2;
 	efloat64 f;
 
-	f = int64_to_efloat64(i);
+	f = int64_bits_to_efloat64(i);
 	err = efloat64_round_trip(f);
 	if (err) {
 		return 1;
 	}
 
-	i2 = efloat64_to_int64(f);
+	i2 = efloat64_to_int64_bits(f);
 
 	if ((FP_NAN != fpclassify(f)) && (i != i2)) {
 		fprintf(stderr,

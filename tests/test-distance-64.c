@@ -28,8 +28,8 @@ int check_efloat64_distance(efloat64 x, efloat64 y, uint64_t expect,
 	distance = efloat64_distance(x, y);
 	err = (distance == expect) ? 0 : 1;
 	if (err || verbose > 1) {
-		xi = efloat64_to_int64(x);
-		yi = efloat64_to_int64(y);
+		xi = efloat64_to_int64_bits(x);
+		yi = efloat64_to_int64_bits(y);
 		fprintf(stderr,
 			"%g (%ld), %g (%ld), reports distance of %lu,"
 			" expected %lu\n", (double)x, (long)xi, (double)y,
@@ -103,22 +103,24 @@ int main(int argc, char **argv)
 		mark = nextafter(mark, efloat64_max);
 	}
 	if (verbose
-	    || labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)) >
-	    10 * 1000 * 1000) {
+	    || labs(efloat64_to_int64_bits(mark) -
+		    efloat64_to_int64_bits(0.0)) > 10 * 1000 * 1000) {
 		fprintf(stderr, "%g (%ld), %g (%ld), difference = %ld?\n",
-			(double)mark, (long)efloat64_to_int64(mark),
-			(double)0.0, (long)efloat64_to_int64(0.0),
-			labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)));
+			(double)mark, (long)efloat64_to_int64_bits(mark),
+			(double)0.0, (long)efloat64_to_int64_bits(0.0),
+			labs(efloat64_to_int64_bits(mark) -
+			     efloat64_to_int64_bits(0.0)));
 		mark = nextafter(0.0, efloat64_max);
 		for (i = 0; i < 10; ++i) {
 			mark = nextafter(mark, efloat64_max);
 		}
 		fprintf(stderr, "using %g (%ld) instead\n", mark,
-			(long)efloat64_to_int64(mark));
+			(long)efloat64_to_int64_bits(mark));
 		fprintf(stderr, "%g (%ld), %g (%ld), difference = %ld\n",
-			(double)mark, (long)efloat64_to_int64(mark),
-			(double)0.0, (long)efloat64_to_int64(0.0),
-			labs(efloat64_to_int64(mark) - efloat64_to_int64(0.0)));
+			(double)mark, (long)efloat64_to_int64_bits(mark),
+			(double)0.0, (long)efloat64_to_int64_bits(0.0),
+			labs(efloat64_to_int64_bits(mark) -
+			     efloat64_to_int64_bits(0.0)));
 	}
 
 	err += check_efloat64_between(0.0, mark, step, verbose, &cnt_0_to_mark);

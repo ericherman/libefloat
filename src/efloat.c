@@ -51,14 +51,14 @@ version.
 
 #if ((defined efloat32_exists) && (efloat32_exists))
 #if HAVE_MEMCPY
-efloat32 uint32_to_efloat32(uint32_t u)
+efloat32 uint32_bits_to_efloat32(uint32_t u)
 {
 	efloat32 f;
 	memcpy(&f, &u, sizeof(efloat32));
 	return f;
 }
 
-uint32_t efloat32_to_uint32(efloat32 f)
+uint32_t efloat32_to_uint32_bits(efloat32 f)
 {
 	uint32_t u;
 	memcpy(&u, &f, sizeof(uint32_t));
@@ -66,14 +66,14 @@ uint32_t efloat32_to_uint32(efloat32 f)
 }
 
 #ifndef SKIP_EFLOAT_SIGNED_INTS
-efloat32 int32_to_efloat32(int32_t i)
+efloat32 int32_bits_to_efloat32(int32_t i)
 {
 	efloat32 f;
 	memcpy(&f, &i, sizeof(efloat32));
 	return f;
 }
 
-int32_t efloat32_to_int32(efloat32 f)
+int32_t efloat32_to_int32_bits(efloat32 f)
 {
 	int32_t i;
 	memcpy(&i, &f, sizeof(int32_t));
@@ -82,7 +82,7 @@ int32_t efloat32_to_int32(efloat32 f)
 #endif /* SKIP_EFLOAT_SIGNED_INTS */
 #else /* HAVE_MEMCPY */
 
-efloat32 uint32_to_efloat32(uint32_t u)
+efloat32 uint32_bits_to_efloat32(uint32_t u)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -92,7 +92,7 @@ efloat32 uint32_to_efloat32(uint32_t u)
 	return pun.f;
 }
 
-uint32_t efloat32_to_uint32(efloat32 f)
+uint32_t efloat32_to_uint32_bits(efloat32 f)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -103,7 +103,7 @@ uint32_t efloat32_to_uint32(efloat32 f)
 }
 
 #ifndef SKIP_EFLOAT_SIGNED_INTS
-efloat32 int32_to_efloat32(int32_t i)
+efloat32 int32_bits_to_efloat32(int32_t i)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -113,7 +113,7 @@ efloat32 int32_to_efloat32(int32_t i)
 	return pun.f;
 }
 
-int32_t efloat32_to_int32(efloat32 f)
+int32_t efloat32_to_int32_bits(efloat32 f)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -140,7 +140,7 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 {
 	uint32_t u32, raw_significand;
 	int32_t raw_exp;
-	u32 = efloat32_to_uint32(f);
+	u32 = efloat32_to_uint32_bits(f);
 
 	fields->sign = (u32 & efloat32_r2_sign_mask) ? -1 : 1;
 
@@ -211,7 +211,7 @@ efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 	    | (raw_exp << efloat32_r2_exp_shift)
 	    | (raw_significand);
 
-	f = uint32_to_efloat32(u32);
+	f = uint32_bits_to_efloat32(u32);
 	if (efloat32class) {
 		*efloat32class = efloat32_radix_2_to_fields(f, &f2);
 	} else {
@@ -270,8 +270,8 @@ uint32_t efloat32_distance(efloat32 x, efloat32 y)
 		return 0;
 	}
 
-	xu = efloat32_to_uint32(x_fields.sign < 0 ? -x : x);
-	yu = efloat32_to_uint32(y_fields.sign < 0 ? -y : y);
+	xu = efloat32_to_uint32_bits(x_fields.sign < 0 ? -x : x);
+	yu = efloat32_to_uint32_bits(y_fields.sign < 0 ? -y : y);
 
 	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;
@@ -283,14 +283,14 @@ uint32_t efloat32_distance(efloat32 x, efloat32 y)
 
 #if ((defined efloat64_exists) && (efloat64_exists))
 #if HAVE_MEMCPY
-efloat64 uint64_to_efloat64(uint64_t u)
+efloat64 uint64_bits_to_efloat64(uint64_t u)
 {
 	efloat64 f;
 	memcpy(&f, &u, sizeof(efloat64));
 	return f;
 }
 
-uint64_t efloat64_to_uint64(efloat64 f)
+uint64_t efloat64_to_uint64_bits(efloat64 f)
 {
 	uint64_t u;
 	memcpy(&u, &f, sizeof(uint64_t));
@@ -298,14 +298,14 @@ uint64_t efloat64_to_uint64(efloat64 f)
 }
 
 #ifndef SKIP_EFLOAT_SIGNED_INTS
-efloat64 int64_to_efloat64(int64_t i)
+efloat64 int64_bits_to_efloat64(int64_t i)
 {
 	efloat64 f;
 	memcpy(&f, &i, sizeof(efloat64));
 	return f;
 }
 
-int64_t efloat64_to_int64(efloat64 f)
+int64_t efloat64_to_int64_bits(efloat64 f)
 {
 	int64_t i;
 	memcpy(&i, &f, sizeof(int64_t));
@@ -313,7 +313,7 @@ int64_t efloat64_to_int64(efloat64 f)
 }
 #endif /* SKIP_EFLOAT_SIGNED_INTS */
 #else /* HAVE MEMCPY */
-efloat64 uint64_to_efloat64(uint64_t u)
+efloat64 uint64_bits_to_efloat64(uint64_t u)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -323,7 +323,7 @@ efloat64 uint64_to_efloat64(uint64_t u)
 	return pun.f;
 }
 
-uint64_t efloat64_to_uint64(efloat64 f)
+uint64_t efloat64_to_uint64_bits(efloat64 f)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -334,7 +334,7 @@ uint64_t efloat64_to_uint64(efloat64 f)
 }
 
 #ifndef SKIP_EFLOAT_SIGNED_INTS
-efloat64 int64_to_efloat64(int64_t i)
+efloat64 int64_bits_to_efloat64(int64_t i)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -344,7 +344,7 @@ efloat64 int64_to_efloat64(int64_t i)
 	return pun.f;
 }
 
-int64_t efloat64_to_int64(efloat64 f)
+int64_t efloat64_to_int64_bits(efloat64 f)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -371,7 +371,7 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 {
 	uint64_t u64, raw_exp, raw_significand;
 
-	u64 = efloat64_to_uint64(f);
+	u64 = efloat64_to_uint64_bits(f);
 
 	fields->sign = (u64 & efloat64_r2_sign_mask) ? -1 : 1;
 
@@ -443,7 +443,7 @@ efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 	    | (raw_exp << efloat64_r2_exp_shift)
 	    | (raw_significand);
 
-	f = uint64_to_efloat64(u64);
+	f = uint64_bits_to_efloat64(u64);
 	if (efloat64class) {
 		*efloat64class = efloat64_radix_2_to_fields(f, &f2);
 	} else {
@@ -502,8 +502,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y)
 		return 0;
 	}
 
-	xu = efloat64_to_uint64(x_fields.sign < 0 ? -x : x);
-	yu = efloat64_to_uint64(y_fields.sign < 0 ? -y : y);
+	xu = efloat64_to_uint64_bits(x_fields.sign < 0 ? -x : x);
+	yu = efloat64_to_uint64_bits(y_fields.sign < 0 ? -y : y);
 
 	if (x_fields.sign == y_fields.sign) {
 		return xu < yu ? yu - xu : xu - yu;

@@ -79,11 +79,11 @@ float.h vales are defined:
  * For each of these types, the header will declare functions to convert
    between integer and floating point types, for easier (de)serialization:
 
-	efloat64  int64_to_efloat64(int64_t i)
-	efloat64 uint64_to_efloat64(uint64_t i)
+	efloat64  int64_bits_to_efloat64(int64_t i)
+	efloat64 uint64_bits_to_efloat64(uint64_t i)
 
-	uint64_t efloat64_to_uint64(efloat64 f)
-	int64_t  efloat64_to_int64(efloat64 f)
+	uint64_t efloat64_to_uint64_bits(efloat64 f)
+	int64_t  efloat64_to_int64_bits(efloat64 f)
 
  * Because it is useful when comparing floats to know how close two values
    are to each other, distance functions are defined which report the
@@ -126,9 +126,9 @@ float.h vales are defined:
 	double d = -123.0/0.5;
 
 	#if (efloat_double == 64)
-	uint64_t u = efloat64_to_uint64(d);
+	uint64_t u = efloat64_to_uint64_bits(d);
 	#else
-	uint32_t u = efloat32_to_uint32(d);
+	uint32_t u = efloat32_to_uint32_bits(d);
 	#endif
 
 	struct efloat_double_fields fields;

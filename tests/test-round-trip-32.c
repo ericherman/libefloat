@@ -83,14 +83,14 @@ unsigned efloat32_round_trip(efloat32 f)
 	check_fpclassify(cls, f);
 
 	f2 = efloat32_radix_2_from_fields(fields, &cls2);
-	if (efloat32_to_uint32(f2) == efloat32_to_uint32(f)) {
+	if (efloat32_to_uint32_bits(f2) == efloat32_to_uint32_bits(f)) {
 		return 0;
 	}
 
 	efloat32_radix_2_to_fields(f2, &fields2);
 	fprintf(stderr, "%g (%llu) != %g (%llu)\n",
-		f2, (unsigned long long)efloat32_to_uint32(f2),
-		f, (unsigned long long)efloat32_to_uint32(f));
+		f2, (unsigned long long)efloat32_to_uint32_bits(f2),
+		f, (unsigned long long)efloat32_to_uint32_bits(f));
 	fprintf(stderr, "float: %g, sign: %u, exp: %d signif: %llu\n", f,
 		fields.sign, fields.exponent,
 		(unsigned long long)fields.significand);
@@ -109,12 +109,12 @@ int uint32_efloat32_round_trip(uint32_t u)
 	int err;
 	uint32_t u2;
 	efloat32 f;
-	f = uint32_to_efloat32(u);
+	f = uint32_bits_to_efloat32(u);
 	err = efloat32_round_trip(f);
 	if (err) {
 		return 1;
 	}
-	u2 = efloat32_to_uint32(f);
+	u2 = efloat32_to_uint32_bits(f);
 
 	if ((FP_NAN != fpclassify(f)) && (u != u2)) {
 		fprintf(stderr,
@@ -136,13 +136,13 @@ int int32_efloat32_round_trip(int32_t i)
 	int32_t i2;
 	efloat32 f;
 
-	f = int32_to_efloat32(i);
+	f = int32_bits_to_efloat32(i);
 	err = efloat32_round_trip(f);
 	if (err) {
 		return 1;
 	}
 
-	i2 = efloat32_to_int32(f);
+	i2 = efloat32_to_int32_bits(f);
 
 	if ((FP_NAN != fpclassify(f)) && (i != i2)) {
 		fprintf(stderr,

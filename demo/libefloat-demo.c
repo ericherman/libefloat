@@ -49,18 +49,18 @@ int main(int argc, char **argv)
 
 	assert(sizeof(double) == sizeof(uint64_t));
 	f64 = val;
-	u64 = efloat64_to_uint64(f64);
+	u64 = efloat64_to_uint64_bits(f64);
 	printf("double: %g => uint64_t: %llx\n", (double)f64,
 	       (unsigned long long)u64);
-	f64r = uint64_to_efloat64(u64);
+	f64r = uint64_bits_to_efloat64(u64);
 	printf("uint64_t: %llx => double: %g\n",
 	       (unsigned long long)u64, (double)f64r);
 
 	assert(sizeof(float) == sizeof(uint32_t));
 	f32 = (float)val;
-	u32 = efloat32_to_uint32(f32);
+	u32 = efloat32_to_uint32_bits(f32);
 	printf("float: %g => uint32_t: %lx\n", (double)f32, (unsigned long)u32);
-	f32r = uint32_to_efloat32(u32);
+	f32r = uint32_bits_to_efloat32(u32);
 	printf("uint32_t: %lx => float: %g\n",
 	       (unsigned long)u32, (double)f32r);
 

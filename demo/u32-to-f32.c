@@ -43,12 +43,9 @@ int parse_and_print_u32_to_f32(const char *str, int base)
 		return 1;
 	}
 	i32 = (int32_t)u32;
-	f32 = uint32_to_efloat32(u32);
-	/*
-	   printf("%u : %d : %1.*e\n", (unsigned)u32, (int)i32,
-	   DECIMAL_DIG, f32);
-	 */
-	printf("%u : %d : %g\n", (unsigned)u32, (int)i32, f32);
+	f32 = uint32_bits_to_efloat32(u32);
+	printf("%u : %d : %g : %1.*e\n", (unsigned)u32, (int)i32, f32,
+	       DECIMAL_DIG, f32);
 	return 0;
 }
 
