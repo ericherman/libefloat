@@ -264,24 +264,28 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #if (efloat_float == 32)
 #define efloat_float_fields efloat32_fields
 #define efloat_float_to_fields(f,fields) efloat32_radix_2_to_fields(f,fields)
+#define efloat_float_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
 #define efloat_float_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
 #if (efloat_float == 64)
 #define efloat_float_fields efloat64_fields
 #define efloat_float_to_fields(f,fields) efloat64_radix_2_to_fields(f,fields)
+#define efloat_float_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)
 #define efloat_float_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
 #if (efloat_double == 32)
 #define efloat_double_fields efloat32_fields
 #define efloat_double_to_fields(d,fields) efloat32_radix_2_to_fields(d,fields)
+#define efloat_double_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
 #define efloat_double_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
 #if (efloat_double == 64)
 #define efloat_double_fields efloat64_fields
 #define efloat_double_to_fields(d,fields) efloat64_radix_2_to_fields(d,fields)
+#define efloat_double_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)
 #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
