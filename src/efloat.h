@@ -213,6 +213,7 @@ struct efloat64_fields {
 #define efloat32_r2_sign_mask 0x80000000UL
 #define efloat32_r2_rexp_mask 0x7F800000UL
 #define efloat32_r2_signif_mask 0x007FFFFFUL
+#define efloat32_r2_exp_bits 8
 #define efloat32_r2_exp_shift 23
 #endif
 
@@ -228,6 +229,7 @@ struct efloat64_fields {
 #define efloat64_r2_sign_mask 0x8000000000000000UL
 #define efloat64_r2_rexp_mask 0x7FF0000000000000UL
 #define efloat64_r2_signif_mask 0x000FFFFFFFFFFFFFUL
+#define efloat64_r2_exp_bits 11
 #define efloat64_r2_exp_shift 52
 #endif
 
@@ -262,6 +264,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif
 
 #if (efloat_float == 32)
+#define efloat_float_exp_bits efloat32_r2_exp_bits
+#define efloat_float_exp_shift efloat32_r2_exp_shift
 #define efloat_float_fields efloat32_fields
 #define efloat_float_to_fields(f,fields) efloat32_radix_2_to_fields(f,fields)
 #define efloat_float_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
@@ -269,6 +273,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif
 
 #if (efloat_float == 64)
+#define efloat_float_exp_bits efloat64_r2_exp_bits
+#define efloat_float_exp_shift efloat54_r2_exp_shift
 #define efloat_float_fields efloat64_fields
 #define efloat_float_to_fields(f,fields) efloat64_radix_2_to_fields(f,fields)
 #define efloat_float_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)
@@ -276,6 +282,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif
 
 #if (efloat_double == 32)
+#define efloat_double_exp_bits efloat32_r2_exp_bits
+#define efloat_double_exp_shift efloat32_r2_exp_shift
 #define efloat_double_fields efloat32_fields
 #define efloat_double_to_fields(d,fields) efloat32_radix_2_to_fields(d,fields)
 #define efloat_double_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
@@ -283,6 +291,8 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif
 
 #if (efloat_double == 64)
+#define efloat_double_exp_bits efloat64_r2_exp_bits
+#define efloat_double_exp_shift efloat64_r2_exp_shift
 #define efloat_double_fields efloat64_fields
 #define efloat_double_to_fields(d,fields) efloat64_radix_2_to_fields(d,fields)
 #define efloat_double_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)

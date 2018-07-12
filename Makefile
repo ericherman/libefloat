@@ -12,6 +12,8 @@
 SHELL=/bin/bash
 UNAME := $(shell uname)
 
+EXPRESSION_PARSER=bc -l <<<
+
 ifeq ($(UNAME), Darwin)
 SHAREDFLAGS = -dynamiclib
 SHAREDEXT = dylib
@@ -206,14 +208,65 @@ valgrind-64: ./$(TEST_RT_64_EXE)-static
 
 valgrind: valgrind-32 valgrind-64
 
-demo: $(A_NAME) $(EFLT_LIB_HDR) $(TEST_DEMO_SRC)
+float-to-fields: $(A_NAME) demo/ehstr.h demo/ehstr.c
+	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+		$(TEST_CFLAGS) \
+		-I./demo \
+		src/efloat.c \
+		demo/ehstr.c \
+		demo/float-to-fields.c -o float-to-fields
+
+double-to-fields: $(A_NAME) demo/ehstr.h demo/ehstr.c
+	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+		$(TEST_CFLAGS) \
+		-I./demo \
+		src/efloat.c \
+		demo/ehstr.c \
+		demo/double-to-fields.c -o double-to-fields
+
+fields-to-float: $(A_NAME) demo/ehstr.h demo/ehstr.c
+	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+		$(TEST_CFLAGS) \
+		-I./demo \
+		src/efloat.c \
+		demo/ehstr.c \
+		demo/fields-to-float.c -o fields-to-float
+
+fields-to-double: $(A_NAME) demo/ehstr.h demo/ehstr.c
+	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+		$(TEST_CFLAGS) \
+		-I./demo \
+		src/efloat.c \
+		demo/ehstr.c \
+		demo/fields-to-double.c -o fields-to-double
+
+$(TEST_DEMO_EXE): $(A_NAME) $(EFLT_LIB_HDR) $(TEST_DEMO_SRC)
 	$(CC) $(TEST_CFLAGS) $(TEST_DEMO_SRC) $(A_NAME) -o $(TEST_DEMO_EXE)
+
+demo: $(TEST_DEMO_EXE) \
+		float-to-fields double-to-fields \
+		fields-to-float fields-to-double
 	./$(TEST_DEMO_EXE) 1
+	@echo
 	./$(TEST_DEMO_EXE) 0.5
+	@echo
 	./$(TEST_DEMO_EXE) 0.0
+	@echo
 	./$(TEST_DEMO_EXE) -0.0
+	@echo
 	./$(TEST_DEMO_EXE) 0.1
+	@echo
 	./$(TEST_DEMO_EXE) -0.00004211
+	@echo
+	./float-to-fields -1234.567
+	@echo
+	./fields-to-float -1 10 10113573
+	($(EXPRESSION_PARSER) '-1 * (2^10) * (10113573 / (2^23))')
+	@echo
+	./double-to-fields -1234.567
+	@echo
+	./fields-to-double -1 10 5429683087074132
+	($(EXPRESSION_PARSER) '-1 * (2^10) * (5429683087074132 / (2^52))')
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0

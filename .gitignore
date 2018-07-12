@@ -8,6 +8,10 @@ warn-if-fpclassify-mismatch
 libefloat-demo
 u32-to-f32
 u64-to-f64
+float-to-fields
+double-to-fields
+fields-to-float
+fields-to-double
 
 ###################
 # backup files
