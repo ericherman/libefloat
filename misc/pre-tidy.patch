@@ -12,7 +12,7 @@
  
  #if HAVE_CONFIG_H
  #include <config.h>
-@@ -299,8 +301,10 @@
+@@ -331,8 +333,10 @@
  #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
  #endif
  

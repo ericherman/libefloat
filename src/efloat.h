@@ -65,6 +65,10 @@ extern "C" {
 #include <config.h>
 #endif
 
+#if HAVE_STDDEF_H
+#include <stddef.h>
+#endif
+
 #if HAVE_STDINT_H
 #include <stdint.h>
 #endif
@@ -77,21 +81,29 @@ extern "C" {
 #include <float.h>
 #endif
 
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#ifndef SKIP_EFLOAT_SIGNED_INTS
+#define SKIP_EFLOAT_SIGNED_INTS 0
+#endif
+
 /* maybe one day we will want RADIX != 2, but I doubt it */
 #define efloat32_radix 2
-
-#if ((!(defined efloat_float)) \
- && (FLT_MAX_EXP == 1024) \
- && (FLT_MANT_DIG == 53) \
- && (FLT_RADIX == 2))
-#define efloat_float 64
-#endif
 
 #if ((!(defined efloat_float)) \
  && (FLT_MAX_EXP == 128) \
  && (FLT_MANT_DIG == 24) \
  && (FLT_RADIX == 2))
 #define efloat_float 32
+#endif
+
+#if ((!(defined efloat_float)) \
+ && (FLT_MAX_EXP == 1024) \
+ && (FLT_MANT_DIG == 53) \
+ && (FLT_RADIX == 2))
+#define efloat_float 64
 #endif
 
 #if ((!(defined efloat_double)) \
@@ -153,16 +165,6 @@ typedef float efloat64;
 #endif
 
 #if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
- && ((defined efloat_double) && (efloat_double == 32)))
-#define efloat32_exists 1
-typedef double efloat32;
-#define efloat32_max DBL_MAX
-#define efloat32_min DBL_MIN
-#define nextafter32(x,y) nextafter(x,y)
-#define nexttoward32(x,y) nexttoward(x,y)
-#endif
-
-#if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
  && ((defined efloat_float) && (efloat_float == 32)))
 #define efloat32_exists 1
 typedef float efloat32;
@@ -170,6 +172,16 @@ typedef float efloat32;
 #define efloat32_min FLT_MIN
 #define nextafter32(x,y) nextafterf(x,y)
 #define nexttoward32(x,y) nexttowardf(x,y)
+#endif
+
+#if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
+ && ((defined efloat_double) && (efloat_double == 32)))
+#define efloat32_exists 1
+typedef double efloat32;
+#define efloat32_max DBL_MAX
+#define efloat32_min DBL_MIN
+#define nextafter32(x,y) nextafter(x,y)
+#define nexttoward32(x,y) nexttoward(x,y)
 #endif
 
 #if (((!(defined efloat32_exists)) || (efloat32_exists == 0)) \
@@ -233,42 +245,53 @@ struct efloat64_fields {
 #define efloat64_r2_exp_shift 52
 #endif
 
-#if ((defined efloat32_exists) && (efloat32_exists))
+#if efloat32_exists
 efloat32 uint32_bits_to_efloat32(uint32_t i);
 uint32_t efloat32_to_uint32_bits(efloat32 f);
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if (!SKIP_EFLOAT_SIGNED_INTS)
 efloat32 int32_bits_to_efloat32(int32_t i);
 int32_t efloat32_to_int32_bits(efloat32 f);
-#endif
+#endif /* (!SKIP_EFLOAT_SIGNED_INTS) */
 enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields);
 efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 				      enum efloat_class *efloat32class);
+#if HAVE_STDIO_H
+char *efloat32_fields_to_expression(const struct efloat32_fields fields,
+				    char *buf, size_t len, int *written);
+#endif /* HAVE_STDIO_H */
 uint32_t efloat32_distance(efloat32 x, efloat32 y);
-#endif
+#endif /* efloat32_exists */
 
-#if ((defined efloat64_exists) && (efloat64_exists))
+#if efloat64_exists
 efloat64 uint64_bits_to_efloat64(uint64_t i);
 uint64_t efloat64_to_uint64_bits(efloat64 f);
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if (!SKIP_EFLOAT_SIGNED_INTS)
 efloat64 int64_bits_to_efloat64(int64_t i);
 int64_t efloat64_to_int64_bits(efloat64 f);
-#endif /* efloat64_also_signed_ints */
+#endif /* (!SKIP_EFLOAT_SIGNED_INTS) */
 enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields);
 efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 				      enum efloat_class *efloat64class);
+#if HAVE_STDIO_H
+char *efloat64_fields_to_expression(const struct efloat64_fields fields,
+				    char *buf, size_t len, int *written);
+#endif /* HAVE_STDIO_H */
 uint64_t efloat64_distance(efloat64 x, efloat64 y);
-#endif
+#endif /* efloat64_exists */
 
 #if (efloat_float == 32)
 #define efloat_float_exp_bits efloat32_r2_exp_bits
 #define efloat_float_exp_shift efloat32_r2_exp_shift
 #define efloat_float_fields efloat32_fields
 #define efloat_float_to_fields(f,fields) efloat32_radix_2_to_fields(f,fields)
-#define efloat_float_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
+#define efloat_float_from_fields(fields, cls) \
+	efloat32_radix_2_from_fields(fields, cls)
+#define efloat_float_fields_to_expression(fields, buf, len, written) \
+	efloat32_fields_to_expression(fields, buf, len, written)
 #define efloat_float_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
@@ -277,7 +300,10 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #define efloat_float_exp_shift efloat54_r2_exp_shift
 #define efloat_float_fields efloat64_fields
 #define efloat_float_to_fields(f,fields) efloat64_radix_2_to_fields(f,fields)
-#define efloat_float_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)
+#define efloat_float_from_fields(fields, cls) \
+	efloat64_radix_2_from_fields(fields, cls)
+#define efloat_float_fields_to_expression(fields, buf, len, written) \
+	efloat64_fields_to_expression(fields, buf, len, writeen)
 #define efloat_float_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
@@ -286,7 +312,10 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #define efloat_double_exp_shift efloat32_r2_exp_shift
 #define efloat_double_fields efloat32_fields
 #define efloat_double_to_fields(d,fields) efloat32_radix_2_to_fields(d,fields)
-#define efloat_double_from_fields(fields, cls) efloat32_radix_2_from_fields(fields, cls)
+#define efloat_double_from_fields(fields, cls) \
+	efloat32_radix_2_from_fields(fields, cls)
+#define efloat_double_fields_to_expression(fields, buf, len, written) \
+	efloat32_fields_to_expression(fields, buf, len, written)
 #define efloat_double_exp_inf_nan efloat32_r2_exp_inf_nan
 #endif
 
@@ -295,7 +324,10 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #define efloat_double_exp_shift efloat64_r2_exp_shift
 #define efloat_double_fields efloat64_fields
 #define efloat_double_to_fields(d,fields) efloat64_radix_2_to_fields(d,fields)
-#define efloat_double_from_fields(fields, cls) efloat64_radix_2_from_fields(fields, cls)
+#define efloat_double_from_fields(fields, cls) \
+	efloat64_radix_2_from_fields(fields, cls)
+#define efloat_double_fields_to_expression(fields, buf, len, written) \
+	efloat64_fields_to_expression(fields, buf, len, written)
 #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 

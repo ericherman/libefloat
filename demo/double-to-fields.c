@@ -28,8 +28,8 @@ int main(int argc, const char **argv)
 	double f;
 	struct efloat_double_fields fields;
 	uint64_t u;
-	size_t bitsbuflen = (64 + 1);
-	char bits[(64 + 1)];
+	size_t buflen = 80;
+	char buf[80];
 
 	f = argc > 1 ? atof(argv[1]) : 2.0;
 
@@ -37,17 +37,15 @@ int main(int argc, const char **argv)
 
 	efloat_double_to_fields(f, &fields);
 
-	printf("%f bits: 0b%s\n", f, utob(bits, bitsbuflen, u, 64));
+	printf("%f bits: 0b%s\n", f, utob(buf, buflen, u, efloat_double));
 	printf("%f as unsigned: %llu\n", f, (unsigned long long)u);
 	printf("%f as fields: sign: %d, exp: %d, mant: %lld\n",
 	       f,
 	       (int)fields.sign,
 	       (int)fields.exponent, (unsigned long long)fields.significand);
-	printf("%f as expression: '%d * (2^%d) * (%lld / (2^%u))'\n",
+	printf("%f as expression: '%s'\n",
 	       f,
-	       (int)fields.sign,
-	       (int)fields.exponent,
-	       (unsigned long long)fields.significand, efloat_double_exp_shift);
+	       efloat_double_fields_to_expression(fields, buf, buflen, NULL));
 
 	return 0;
 }

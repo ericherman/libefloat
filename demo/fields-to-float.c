@@ -43,8 +43,10 @@ int main(int argc, const char **argv)
 	uint32_t u;
 
 	enum efloat_class cls;
-	size_t bitsbuflen = (efloat_float + 1);
-	char bits[(efloat_float + 1)];
+	size_t buflen = 80;
+	char buf[80];
+
+	buf[0] = '\0';
 
 	fields.sign = argc > 1 ? atoi(argv[1]) : 1;
 	fields.exponent = argc > 2 ? atoi(argv[2]) : 0;
@@ -58,13 +60,10 @@ int main(int argc, const char **argv)
 	       f,
 	       (int)fields.sign,
 	       (int)fields.exponent, (unsigned long long)fields.significand);
-	printf("%f bits: 0b%s\n", f, utob(bits, bitsbuflen, u, efloat_float));
+	printf("%f bits: 0b%s\n", f, utob(buf, buflen, u, efloat_float));
 	printf("%f as unsigned: %llu\n", f, (unsigned long long)u);
-	printf("%f as expression: '%d * (2^%d) * (%lld / (2^%u))'\n",
-	       f,
-	       (int)fields.sign,
-	       (int)fields.exponent,
-	       (unsigned long long)fields.significand, efloat_float_exp_shift);
+	printf("%f as expression: '%s'\n",
+	       f, efloat_float_fields_to_expression(fields, buf, buflen, NULL));
 
 	return 0;
 }

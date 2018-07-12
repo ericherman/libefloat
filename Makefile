@@ -14,6 +14,25 @@ UNAME := $(shell uname)
 
 EXPRESSION_PARSER=bc -l <<<
 
+CC=gcc
+
+# we may use "long long" for uint64_t (x86 32bit)
+CSTD_CFLAGS=-std=c89 -pedantic -Wno-long-long
+
+# tests need "gnu89" for fpclassify
+TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long -DHAVE_SNPRINTF=1
+
+SYSTEM_CONFIG_CFLAGS= \
+ -DHAVE_STDINT_H=1 \
+ -DHAVE_STDDEF_H=1 \
+ -DHAVE_LIMITS_H=1 \
+ -DHAVE_FLOAT_H=1 \
+ -DHAVE_MEMCPY=1 \
+ -DHAVE_STRING_H=1 \
+ -DHAVE_STDIO_H=1 \
+ -DHAVE_ERRNO=1 \
+ -DHAVE_ERRNO_H=1
+
 ifeq ($(UNAME), Darwin)
 SHAREDFLAGS = -dynamiclib
 SHAREDEXT = dylib
@@ -38,17 +57,6 @@ ifneq ($(strip $(srcdir)),)
    VPATH::=$(srcdir)
 endif
 
-CC=gcc
-
-SYSTEM_CONFIG_CFLAGS= \
- -DHAVE_STDINT_H=1 \
- -DHAVE_LIMITS_H=1 \
- -DHAVE_FLOAT_H=1 \
- -DHAVE_MEMCPY=1 \
- -DHAVE_STRING_H=1 \
- -DHAVE_STDIO_H=1 \
- -DHAVE_ERRNO=1 \
- -DHAVE_ERRNO_H=1
 
 # typical
 BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
@@ -57,8 +65,6 @@ BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
 # debug
 #BUILD_TYPE_CFLAGS=-g -O0 -DDEBUG=1
 
-# we may use "long long" for uint64_t (x86 32bit)
-CSTD_CFLAGS=-std=c89 -pedantic -Wno-long-long
 
 NOISY_CFLAGS=-Werror -Wall -Wextra -Werror=cast-qual
 
@@ -70,9 +76,6 @@ BASE_CFLAGS=$(CFLAGS) \
  $(INCLUDES_CFLAGS)
 
 LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS) $(SYSTEM_CONFIG_CFLAGS)
-
-# tests need "gnu89" for fpclassify
-TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long
 
 TEST_CFLAGS=$(TEST_CSTD_CFLAGS) $(BASE_CFLAGS)
 TEST_LDFLAGS=$(LDFLAGS) -L.
@@ -261,12 +264,12 @@ demo: $(TEST_DEMO_EXE) \
 	./float-to-fields -1234.567
 	@echo
 	./fields-to-float -1 10 10113573
-	($(EXPRESSION_PARSER) '-1 * (2^10) * (10113573 / (2^23))')
+	($(EXPRESSION_PARSER) '(-1 * (2^10) * (10113573 / (2^23)))')
 	@echo
 	./double-to-fields -1234.567
 	@echo
 	./fields-to-double -1 10 5429683087074132
-	($(EXPRESSION_PARSER) '-1 * (2^10) * (5429683087074132 / (2^52))')
+	($(EXPRESSION_PARSER) '(-1 * (2^10) * (5429683087074132 / (2^52)))')
 
 # extracted from https://github.com/torvalds/linux/blob/master/scripts/Lindent
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0

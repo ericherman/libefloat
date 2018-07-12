@@ -49,6 +49,33 @@ version.
 #define seterrnoinval()		/* NOOP */
 #endif
 
+#if HAVE_STDIO_H
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+
+#ifndef PRId8
+#define PRId8 "d"
+#endif
+
+#ifndef PRId16
+#define PRId16 "d"
+#endif
+
+#ifndef PRIu32
+#define PRIu32 "u"
+#endif
+
+#ifndef PRIu64
+#if (ULONG_MAX == 4294967295UL)
+#define PRIu64 "llu"
+#else
+#define PRIu64 "lu"
+#endif /* (ULONG_MAX == 4294967295UL) */
+#endif /* PRIu64 */
+#endif /* HAVE_INTTYPES_H */
+#endif /* HAVE_STDIO_H */
+
 #if ((defined efloat32_exists) && (efloat32_exists))
 #if HAVE_MEMCPY
 efloat32 uint32_bits_to_efloat32(uint32_t u)
@@ -65,7 +92,7 @@ uint32_t efloat32_to_uint32_bits(efloat32 f)
 	return u;
 }
 
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if !SKIP_EFLOAT_SIGNED_INTS
 efloat32 int32_bits_to_efloat32(int32_t i)
 {
 	efloat32 f;
@@ -79,7 +106,7 @@ int32_t efloat32_to_int32_bits(efloat32 f)
 	memcpy(&i, &f, sizeof(int32_t));
 	return i;
 }
-#endif /* SKIP_EFLOAT_SIGNED_INTS */
+#endif /* !SKIP_EFLOAT_SIGNED_INTS */
 #else /* HAVE_MEMCPY */
 
 efloat32 uint32_bits_to_efloat32(uint32_t u)
@@ -102,7 +129,7 @@ uint32_t efloat32_to_uint32_bits(efloat32 f)
 	return pun.u;
 }
 
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if !SKIP_EFLOAT_SIGNED_INTS
 efloat32 int32_bits_to_efloat32(int32_t i)
 {
 	union efloat32_u {
@@ -122,7 +149,7 @@ int32_t efloat32_to_int32_bits(efloat32 f)
 	pun.f = f;
 	return pun.i;
 }
-#endif /* SKIP_EFLOAT_SIGNED_INTS */
+#endif /* !SKIP_EFLOAT_SIGNED_INTS */
 #endif /* HAVE_MEMCPY */
 
 enum efloat_class efloat32_classify(efloat32 f)
@@ -238,6 +265,35 @@ efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 	return f;
 }
 
+#if HAVE_STDIO_H
+char *efloat32_fields_to_expression(const struct efloat32_fields fields,
+				    char *buf, size_t len, int *written)
+{
+	const char *fmt;
+	int rv;
+
+	fmt = "(%" PRId8 " * (2^%" PRId16 ") * (%" PRIu32 " / (2^%u)))";
+	rv = 0;
+
+#if HAVE_SNPRINTF
+	rv = snprintf(buf, len, fmt, fields.sign, fields.exponent,
+		      fields.significand, efloat_double_exp_shift);
+#else
+	if (len <= (strlen(fmt) + 15)) {
+		rv = -1;
+	} else {
+		rv = sprintf(buf, fmt, fields.sign, fields.exponent,
+			     fields.significand, efloat_double_exp_shift);
+	}
+#endif /* HAVE_SNPRINTF */
+
+	if (written) {
+		*written = rv;
+	}
+	return (rv > 0) ? buf : NULL;
+}
+#endif /* HAVE_STDIO_H */
+
 uint32_t efloat32_distance(efloat32 x, efloat32 y)
 {
 	uint32_t xu, yu;
@@ -297,7 +353,7 @@ uint64_t efloat64_to_uint64_bits(efloat64 f)
 	return u;
 }
 
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if !SKIP_EFLOAT_SIGNED_INTS
 efloat64 int64_bits_to_efloat64(int64_t i)
 {
 	efloat64 f;
@@ -311,7 +367,7 @@ int64_t efloat64_to_int64_bits(efloat64 f)
 	memcpy(&i, &f, sizeof(int64_t));
 	return i;
 }
-#endif /* SKIP_EFLOAT_SIGNED_INTS */
+#endif /* !SKIP_EFLOAT_SIGNED_INTS */
 #else /* HAVE MEMCPY */
 efloat64 uint64_bits_to_efloat64(uint64_t u)
 {
@@ -333,7 +389,7 @@ uint64_t efloat64_to_uint64_bits(efloat64 f)
 	return pun.u;
 }
 
-#ifndef SKIP_EFLOAT_SIGNED_INTS
+#if !SKIP_EFLOAT_SIGNED_INTS
 efloat64 int64_bits_to_efloat64(int64_t i)
 {
 	union efloat64_u {
@@ -353,7 +409,7 @@ int64_t efloat64_to_int64_bits(efloat64 f)
 	pun.f = f;
 	return pun.i;
 }
-#endif /* SKIP_EFLOAT_SIGNED_INTS */
+#endif /* !SKIP_EFLOAT_SIGNED_INTS */
 #endif /* HAVE_MEMCPY */
 
 enum efloat_class efloat64_classify(efloat64 f)
@@ -469,6 +525,36 @@ efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 	}
 	return f;
 }
+
+#if HAVE_STDIO_H
+char *efloat64_fields_to_expression(const struct efloat64_fields fields,
+				    char *buf, size_t len, int *written)
+{
+	const char *fmt;
+	int rv;
+
+	fmt = "(%" PRId8 " * (2^%" PRId16 ") * (%" PRIu64 " / (2^%u)))";
+	rv = 0;
+
+#if HAVE_SNPRINTF
+	rv = snprintf(buf, len, fmt, fields.sign, fields.exponent,
+		      fields.significand, efloat_double_exp_shift);
+#else
+	if (len <= (strlen(fmt) + 30)) {
+		rv = -1;
+	} else {
+		rv = sprintf(buf, fmt, fields.sign, fields.exponent,
+			     fields.significand, efloat_double_exp_shift);
+	}
+#endif /* HAVE_SNPRINTF */
+
+	if (written) {
+		*written = rv;
+	}
+
+	return rv > 0 ? buf : NULL;
+}
+#endif /* HAVE_STDIO_H */
 
 uint64_t efloat64_distance(efloat64 x, efloat64 y)
 {
