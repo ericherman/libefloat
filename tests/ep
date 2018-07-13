@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ "_$@_" == "__" ]]; then
+	echo "empty expression"
+	exit 1
+fi
+echo "$@" | bc -lq
+exit 0
