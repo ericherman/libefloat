@@ -1,5 +1,5 @@
 # Makefile: Embedable Float manipulation library
-# Copyright (C) 2017 Eric Herman
+# Copyright (C) 2017, 2018 Eric Herman
 #
 # https://github.com/ericherman/libefloat
 #
@@ -12,7 +12,7 @@
 SHELL=/bin/bash
 UNAME := $(shell uname)
 
-EXPRESSION_PARSER=bc -l <<<
+EXPRESSION_PARSER=./tests/ep
 
 CC=gcc
 
@@ -77,7 +77,9 @@ BASE_CFLAGS=$(CFLAGS) \
 
 LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS) $(SYSTEM_CONFIG_CFLAGS)
 
-TEST_CFLAGS=$(TEST_CSTD_CFLAGS) $(BASE_CFLAGS)
+TEST_INCLUDES_CFLAGS=$(INCLUDES_CFLAGS) -I./tests
+
+TEST_CFLAGS=$(TEST_CSTD_CFLAGS) $(BASE_CFLAGS) $(TEST_INCLUDES_CFLAGS)
 TEST_LDFLAGS=$(LDFLAGS) -L.
 TEST_LDADD=$(LDADD) -lm -lefloat
 
@@ -95,6 +97,8 @@ endif
 
 A_NAME=libefloat.a
 
+TEST_COMMON_SRC=tests/echeck.h tests/echeck.c
+
 TEST_RT_32_SRC=tests/test-round-trip-32.c
 TEST_RT_32_OBJ=test-round-trip-32.o
 TEST_RT_32_EXE=test-round-trip-32
@@ -111,10 +115,17 @@ TEST_DIST_64_SRC=tests/test-distance-64.c
 TEST_DIST_64_OBJ=test-distance-64.o
 TEST_DIST_64_EXE=test-distance-64
 
+TEST_EXPRESSION_32_SRC=tests/test-expression-32.c
+TEST_EXPRESSION_32_OBJ=test-expression-32.o
+TEST_EXPRESSION_32_EXE=test-expression-32
+
 TEST_DEMO_SRC=demo/libefloat-demo.c
 TEST_DEMO_EXE=libefloat-demo
 
 default: library
+
+echeck.o: tests/echeck.h tests/echeck.c
+	$(CC) -c -fPIC $(TEST_CFLAGS) tests/echeck.c -o echeck.o
 
 $(EFLT_LIB_OBJ): $(EFLT_LIB_HDR) $(EFLT_LIB_SRC)
 	$(CC) -c -fPIC $(LIB_CFLAGS) $(EFLT_LIB_SRC) -o $(EFLT_LIB_OBJ)
@@ -128,6 +139,7 @@ $(A_NAME): $(SO_OBJS)
 	ar -r $(A_NAME) $(SO_OBJS)
 
 $(LIB_NAME): $(SO_NAME) $(A_NAME)
+
 
 warn-if-fpclassify-mismatch: $(A_NAME) tests/warn-if-fpclassify-mismatch.c
 	$(CC) $(TEST_CFLAGS) $(A_NAME) tests/warn-if-fpclassify-mismatch.c \
@@ -151,13 +163,22 @@ $(TEST_DIST_32_EXE)-dynamic: $(TEST_DIST_32_OBJ) $(SO_NAME)
 	$(CC) $(TEST_DIST_32_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_DIST_32_EXE)-dynamic $(TEST_LDADD)
 
+$(TEST_EXPRESSION_32_OBJ): $(EFLT_LIB_HDR) $(TEST_EXPRESSION_32_SRC) echeck.o
+	$(CC) -c $(SYSTEM_CONFIG_CFLAGS) $(TEST_CFLAGS) \
+	$(TEST_EXPRESSION_32_SRC) -o $(TEST_EXPRESSION_32_OBJ)
+
+$(TEST_EXPRESSION_32_EXE)-dynamic: $(TEST_EXPRESSION_32_OBJ) $(SO_NAME)
+	$(CC) $(TEST_EXPRESSION_32_OBJ) echeck.o $(TEST_LDFLAGS) \
+		-o $(TEST_EXPRESSION_32_EXE)-dynamic $(TEST_LDADD)
+
 check-32-static: $(TEST_RT_32_EXE)-static warn-if-fpclassify-mismatch
 	./$(TEST_RT_32_EXE)-static
 
 check-32-dynamic: $(TEST_RT_32_EXE)-dynamic $(TEST_DIST_32_EXE)-dynamic \
-	warn-if-fpclassify-mismatch
+	warn-if-fpclassify-mismatch $(TEST_EXPRESSION_32_EXE)-dynamic
 	LD_LIBRARY_PATH=. ./$(TEST_RT_32_EXE)-dynamic
 	LD_LIBRARY_PATH=. ./$(TEST_DIST_32_EXE)-dynamic
+	LD_LIBRARY_PATH=. ./$(TEST_EXPRESSION_32_EXE)-dynamic
 
 check-32: check-32-static check-32-dynamic
 

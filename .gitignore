@@ -12,6 +12,7 @@ float-to-fields
 double-to-fields
 fields-to-float
 fields-to-double
+test-expression-32-dynamic
 
 ###################
 # backup files

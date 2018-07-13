@@ -1,6 +1,6 @@
 /*
 efloat.h: Embedable Float manipulation library
-Copyright (C) 2017 Eric Herman
+Copyright (C) 2017, 2018 Eric Herman
 
 https://github.com/ericherman/libefloat
 
