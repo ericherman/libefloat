@@ -277,13 +277,13 @@ char *efloat32_fields_to_expression(const struct efloat32_fields fields,
 
 #if HAVE_SNPRINTF
 	rv = snprintf(buf, len, fmt, fields.sign, fields.exponent,
-		      fields.significand, efloat_double_exp_shift);
+		      fields.significand, efloat_float_exp_shift);
 #else
 	if (len <= (strlen(fmt) + 15)) {
 		rv = -1;
 	} else {
 		rv = sprintf(buf, fmt, fields.sign, fields.exponent,
-			     fields.significand, efloat_double_exp_shift);
+			     fields.significand, efloat_float_exp_shift);
 	}
 #endif /* HAVE_SNPRINTF */
 
