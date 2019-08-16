@@ -58,7 +58,11 @@ https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#longBitsToDouble
 #define EFLOAT_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Efloat_begin_C_functions extern "C" {
+#define Efloat_end_C_functions }
+#else
+#define Efloat_begin_C_functions
+#define Efloat_end_C_functions
 #endif
 
 #if HAVE_CONFIG_H
@@ -245,6 +249,8 @@ struct efloat64_fields {
 #define efloat64_r2_exp_shift 52
 #endif
 
+Efloat_begin_C_functions
+/* first the efloat32 functions */
 #if efloat32_exists
 efloat32 uint32_bits_to_efloat32(uint32_t i);
 uint32_t efloat32_to_uint32_bits(efloat32 f);
@@ -264,6 +270,8 @@ char *efloat32_fields_to_expression(const struct efloat32_fields fields,
 uint32_t efloat32_distance(efloat32 x, efloat32 y);
 #endif /* efloat32_exists */
 
+/* next the efloat64 functions */
+
 #if efloat64_exists
 efloat64 uint64_bits_to_efloat64(uint64_t i);
 uint64_t efloat64_to_uint64_bits(efloat64 f);
@@ -282,6 +290,8 @@ char *efloat64_fields_to_expression(const struct efloat64_fields fields,
 #endif /* HAVE_STDIO_H */
 uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif /* efloat64_exists */
+
+/* last the function aliases */
 
 #if (efloat_float == 32)
 #define efloat_float_exp_bits efloat32_r2_exp_bits
@@ -331,8 +341,7 @@ uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #define efloat_double_exp_inf_nan efloat64_r2_exp_inf_nan
 #endif
 
-#ifdef __cplusplus
-}
-#endif
-
+Efloat_end_C_functions
+#undef Efloat_begin_C_functions
+#undef Efloat_end_C_functions
 #endif /* EFLOAT_H */

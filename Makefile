@@ -296,14 +296,12 @@ demo: $(TEST_DEMO_EXE) \
 LINDENT=indent -npro -kr -i8 -ts8 -sob -l80 -ss -ncs -cp1 -il0
 
 tidy:
-	patch -Np1 -i misc/pre-tidy.patch
 	$(LINDENT) \
 		-T efloat32 -T efloat64 -T efloat_class \
 		-T FILE -T size_t -T ssize_t \
 		-T uint8_t -T uint16_t -T uint32_t -T uint64_t \
 		-T int8_t -T int16_t -T int32_t -T int64_t \
 		`find src tests demo -name '*.h' -o -name '*.c'`
-	patch -Rp1 -i misc/pre-tidy.patch
 
 spotless:
 	git clean -dxf

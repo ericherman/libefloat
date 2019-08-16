@@ -21,11 +21,16 @@ You should have received a copy of the GNU Lesser General Public License
 #define EHSTR_H
 
 #ifdef __cplusplus
-extern "C" {
+#define Ehstr_begin_C_functions extern "C" {
+#define Ehstr_end_C_functions }
+#else
+#define Ehstr_begin_C_functions
+#define Ehstr_end_C_functions
 #endif
 
 #include <stddef.h>		/* size_t */
 
+Ehstr_begin_C_functions
 /*
   unsigned to big-endian binary
   represents a binary value as a string of zeros and ones
@@ -50,6 +55,10 @@ char *decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 char *hex_to_decimal(const char *hex_str, size_t hex_len, char *buf,
 		     size_t buf_len);
 
+void byte_to_hex_chars(unsigned char byte, char *high, char *low);
+
+unsigned char hex_chars_to_byte(char high, char low);
+
 /*
   mostly for c89 compat
 
@@ -63,8 +72,7 @@ size_t ehstrnlen(const char *str, size_t buf_size);
 #include <string.h>
 #endif
 
-#ifdef __cplusplus
-}
-#endif
-
+Ehstr_end_C_functions
+#define Ehstr_begin_C_functions
+#define Ehstr_end_C_functions
 #endif /* EHSTR_H */

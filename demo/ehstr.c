@@ -25,6 +25,15 @@ You should have received a copy of the GNU Lesser General Public License
 
 #include "ehstr.h"
 
+#ifndef Ehstr_memset
+#include <string.h>		/* memset */
+#define Ehstr_memset memset
+#endif
+
+#ifndef assert
+#include <assert.h>
+#endif
+
 char *utob(char *buf, size_t buf_size, unsigned long val, size_t bits)
 {
 	size_t i, shift, str_pos;
@@ -104,6 +113,10 @@ void revstr(char *str, size_t buf_size)
 	size_t i, j, len;
 	char swap;
 
+	if ((!str) || (!str[0])) {
+		return;
+	}
+
 	len = strnlen(str, buf_size);
 	for (i = 0, j = len - 1; i < j; ++i, --j) {
 		swap = str[i];
@@ -114,17 +127,24 @@ void revstr(char *str, size_t buf_size)
 
 static char nibble_to_hex(unsigned char nibble)
 {
+	assert(nibble < 16);
+
 	if (nibble < 10) {
 		return '0' + nibble;
 	} else if (nibble < 16) {
 		return 'A' + nibble - 10;
-	} else {
-		return '\0';
 	}
+
+	/* crash */
+	((char *)NULL)[0] = nibble;
+	return '\0';
 }
 
 static unsigned char hex_to_nibble(char hex)
 {
+	assert((hex >= '0' && hex <= '9') || (hex >= 'a' && hex <= 'f')
+	       || (hex >= 'A' && hex <= 'F'));
+
 	if (hex >= '0' && hex <= '9') {
 		return (unsigned char)hex - '0';
 	} else if (hex >= 'a' && hex <= 'f') {
@@ -203,10 +223,7 @@ char *decimal_to_hex(const char *dec_str, size_t dec_len, char *buf,
 
 	/* leave a "00" if the leading byte would be greater than 7F */
 	if (j + 1 < hex_len) {
-		byte = 0;
-
-		byte = hex_to_nibble(hex_buf[j]) << 4;
-		byte += hex_to_nibble(hex_buf[j + 1]);
+		byte = hex_chars_to_byte(hex_buf[j], hex_buf[j + 1]);
 		if (byte > 0x7F) {
 			j -= 2;
 		}
@@ -246,9 +263,7 @@ char *hex_to_decimal(const char *hex, size_t hex_len, char *buf, size_t buf_len)
 	dec_len = buf_len - 1;	/* leave room for the NULL terminator */
 
 	/* zero out the buffer */
-	for (i = 0; i < dec_len; ++i) {
-		dec_buf[i] = 0;
-	}
+	Ehstr_memset(dec_buf, 0, dec_len);
 
 	for (i = 0; i < hex_len && hex[i] != 0; ++i) {
 		ascii_offset = 0;
@@ -310,4 +325,20 @@ char *hex_to_decimal(const char *hex, size_t hex_len, char *buf, size_t buf_len)
 	buf[buf_len - 1 - j] = '\0';
 
 	return buf;
+}
+
+void byte_to_hex_chars(unsigned char byte, char *high, char *low)
+{
+	*high = nibble_to_hex((byte & 0xF0) >> 4);
+	*low = nibble_to_hex((byte & 0x0F));
+}
+
+unsigned char hex_chars_to_byte(char high, char low)
+{
+	unsigned char byte;
+
+	byte = hex_to_nibble(high) << 4;
+	byte += hex_to_nibble(low);
+
+	return byte;
 }
