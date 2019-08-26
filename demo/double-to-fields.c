@@ -1,21 +1,14 @@
-/* double-to-fields.c
-Copyright (C) 2018 Eric Herman
-
+/* SPDX-License-Identifier: LGPL-2.1-or-later */
+/* double-to-fields.c */
+/* Copyright (C) 2018, 2019 Eric Herman */
+/* https://github.com/ericherman/libefloat */
+/*
 gcc -pipe -g -std=c89 -Wno-long-long -Wall -Wextra -Werror -pedantic \
  -DHAVE_STDINT_H=1 -DHAVE_LIMITS_H=1 -DHAVE_FLOAT_H=1 -DHAVE_MEMCPY=1 \
  -DHAVE_STRING_H=1 -DHAVE_STDIO_H=1 -DHAVE_ERRNO=1 -DHAVE_ERRNO_H=1 \
  -I./src src/efloat.c \
  -I./demo demo/ehstr.c \
   demo/double-to-fields.c -o double-to-fields
-
-uses:
-https://github.com/ericherman/libefloat
-
-This work is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later
-version.
 */
 
 #include <stdio.h>

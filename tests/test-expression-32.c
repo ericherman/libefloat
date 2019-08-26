@@ -1,6 +1,6 @@
-/*
+*
 test-expression-32.c: quick test for the Embedable Float manipulation library
-Copyright (C) 2018 Eric Herman
+Copyright (C) 2018, 2019 Eric Herman
 
 https://github.com/ericherman/libefloat
 

@@ -1,15 +1,7 @@
-/*
-test-round-trip-64.c: quick test for the Embedable Float manipulation library
-Copyright (C) 2017, 2018 Eric Herman
-
-https://github.com/ericherman/libefloat
-
-This work is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later
-version.
-*/
+/* SPDX-License-Identifier: LGPL-2.1-or-later */
+/* test-round-trip-64.c: test of the Embedable Float manipulation library */
+/* Copyright (C) 2017, 2018, 2019 Eric Herman */
+/* https://github.com/ericherman/libefloat */
 
 #include <stdio.h>
 #include <stdlib.h>
