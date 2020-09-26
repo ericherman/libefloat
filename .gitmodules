@@ -1,0 +1,6 @@
+[submodule "submodules/libecheck"]
+	path = submodules/libecheck
+	url = https://github.com/ericherman/libecheck.git
+[submodule "submodules/libehstr"]
+	path = submodules/libehstr
+	url = https://github.com/ericherman/libehstr

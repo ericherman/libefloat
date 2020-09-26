@@ -22,16 +22,16 @@ CSTD_CFLAGS=-std=c89 -pedantic -Wno-long-long
 # tests need "gnu89" for fpclassify
 TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long -DHAVE_SNPRINTF=1
 
+# C99:
+# -DHAVE_SNPRINTF=1
+
 SYSTEM_CONFIG_CFLAGS= \
- -DHAVE_STDINT_H=1 \
- -DHAVE_STDDEF_H=1 \
- -DHAVE_LIMITS_H=1 \
- -DHAVE_FLOAT_H=1 \
+ -DHAVE_ERRNO=1 \
+ -DHAVE_ERRNO_H=1 \
+ -DHAVE_INTTYPES_H=1 \
  -DHAVE_MEMCPY=1 \
  -DHAVE_STRING_H=1 \
- -DHAVE_STDIO_H=1 \
- -DHAVE_ERRNO=1 \
- -DHAVE_ERRNO_H=1
+ -DHAVE_STDIO_H=1
 
 ifeq ($(UNAME), Darwin)
 SHAREDFLAGS = -dynamiclib
@@ -77,7 +77,10 @@ BASE_CFLAGS=$(CFLAGS) \
 
 LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS) $(SYSTEM_CONFIG_CFLAGS)
 
-TEST_INCLUDES_CFLAGS=$(INCLUDES_CFLAGS) -I./tests
+ECHECK_SRC=./submodules/libecheck/src
+EHSTR_SRC=./submodules/libehstr/src
+
+TEST_INCLUDES_CFLAGS=$(INCLUDES_CFLAGS) -I./tests -I$(ECHECK_SRC)
 
 TEST_CFLAGS=$(TEST_CSTD_CFLAGS) $(BASE_CFLAGS) $(TEST_INCLUDES_CFLAGS)
 TEST_LDFLAGS=$(LDFLAGS) -L.
@@ -97,7 +100,7 @@ endif
 
 A_NAME=libefloat.a
 
-TEST_COMMON_SRC=tests/echeck.h tests/echeck.c
+TEST_COMMON_SRC=$(ECHECK_SRC)/echeck.h $(ECHECK_SRC)/echeck.c
 
 TEST_RT_32_SRC=tests/test-round-trip-32.c
 TEST_RT_32_OBJ=test-round-trip-32.o
@@ -124,8 +127,8 @@ TEST_DEMO_EXE=libefloat-demo
 
 default: library
 
-echeck.o: tests/echeck.h tests/echeck.c
-	$(CC) -c -fPIC $(TEST_CFLAGS) tests/echeck.c -o echeck.o
+echeck.o: $(ECHECK_SRC)/echeck.h $(ECHECK_SRC)/echeck.c
+	$(CC) -c -fPIC $(TEST_CFLAGS) $(ECHECK_SRC)/echeck.c -o echeck.o
 
 $(EFLT_LIB_OBJ): $(EFLT_LIB_HDR) $(EFLT_LIB_SRC)
 	$(CC) -c -fPIC $(LIB_CFLAGS) $(EFLT_LIB_SRC) -o $(EFLT_LIB_OBJ)
@@ -232,36 +235,40 @@ valgrind-64: ./$(TEST_RT_64_EXE)-static
 
 valgrind: valgrind-32 valgrind-64
 
-float-to-fields: $(A_NAME) demo/ehstr.h demo/ehstr.c
+float-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
 		$(TEST_CFLAGS) \
 		-I./demo \
+		-I$(EHSTR_SRC) \
 		src/efloat.c \
-		demo/ehstr.c \
+		$(EHSTR_SRC)/ehstr.c \
 		demo/float-to-fields.c -o float-to-fields
 
-double-to-fields: $(A_NAME) demo/ehstr.h demo/ehstr.c
+double-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
 		$(TEST_CFLAGS) \
 		-I./demo \
+		-I$(EHSTR_SRC) \
 		src/efloat.c \
-		demo/ehstr.c \
+		$(EHSTR_SRC)/ehstr.c \
 		demo/double-to-fields.c -o double-to-fields
 
-fields-to-float: $(A_NAME) demo/ehstr.h demo/ehstr.c
+fields-to-float: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
 		$(TEST_CFLAGS) \
 		-I./demo \
+		-I$(EHSTR_SRC) \
 		src/efloat.c \
-		demo/ehstr.c \
+		$(EHSTR_SRC)/ehstr.c \
 		demo/fields-to-float.c -o fields-to-float
 
-fields-to-double: $(A_NAME) demo/ehstr.h demo/ehstr.c
+fields-to-double: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
 		$(TEST_CFLAGS) \
 		-I./demo \
+		-I$(EHSTR_SRC) \
 		src/efloat.c \
-		demo/ehstr.c \
+		$(EHSTR_SRC)/ehstr.c \
 		demo/fields-to-double.c -o fields-to-double
 
 $(TEST_DEMO_EXE): $(A_NAME) $(EFLT_LIB_HDR) $(TEST_DEMO_SRC)

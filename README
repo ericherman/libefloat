@@ -143,6 +143,10 @@ float.h vales are defined:
 
 Building
 --------
+git clone -o upstream https://github.com/ericherman/libehstr.git
+cd libehstr
+git submodule update --init --recursive
+
 The included Makefile shows an exaple; try "make check"
 
 

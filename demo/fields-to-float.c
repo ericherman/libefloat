@@ -3,12 +3,13 @@
 /* Copyright (C) 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 /*
-gcc -pipe -g -std=c89 -Wno-long-long -Wall -Wextra -Werror -pedantic \
- -DHAVE_STDINT_H=1 -DHAVE_LIMITS_H=1 -DHAVE_FLOAT_H=1 -DHAVE_MEMCPY=1 \
- -DHAVE_STRING_H=1 -DHAVE_STDIO_H=1 -DHAVE_ERRNO=1 -DHAVE_ERRNO_H=1 \
- -I./src src/efloat.c \
- -I./demo demo/ehstr.c \
-  demo/fields-to-float.c -o fields-to-float
+   gcc -pipe -g -O2 -std=gnu89 -pedantic -Wno-long-long -Werror -Wall -Wextra \
+    -Werror=cast-qual -fomit-frame-pointer -DNDEBUG \
+    -DHAVE_ERRNO=1 -DHAVE_ERRNO_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_MEMCPY=1 \
+    -DHAVE_STRING_H=1 -DHAVE_SATDIO_H=1 -DHAVE_SNPRINTF=1 \
+    -I./src -I./submodules/libehstr/src -I./demo \
+    src/efloat.c ./submodules/libehstr/src/ehstr.c \
+    demo/fields-to-float.c -o fields-to-float
 */
 
 #include <stdio.h>

@@ -3,7 +3,11 @@
 /* Copyright (C) 2017, 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 
-#include <efloat.h>
+#include "efloat.h"
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifndef eprintf2
 #if HAVE_STDIO_H
@@ -284,6 +288,21 @@ char *efloat32_fields_to_expression(const struct efloat32_fields fields,
 	}
 	return (rv > 0) ? buf : NULL;
 }
+#else
+char *efloat32_fields_to_expression(const struct efloat32_fields fields,
+				    char *buf, size_t len, int *written)
+{
+	/* ignore fields */
+	(void)fields;
+
+	if (len) {
+		buf[0] = '\0';
+	}
+	if (written) {
+		*written = 0;
+	}
+	return 0;
+}
 #endif /* HAVE_STDIO_H */
 
 uint32_t efloat32_distance(efloat32 x, efloat32 y)
@@ -545,6 +564,21 @@ char *efloat64_fields_to_expression(const struct efloat64_fields fields,
 	}
 
 	return rv > 0 ? buf : NULL;
+}
+#else
+char *efloat64_fields_to_expression(const struct efloat64_fields fields,
+				    char *buf, size_t len, int *written)
+{
+	/* ignore fields */
+	(void)fields;
+
+	if (len) {
+		buf[0] = '\0';
+	}
+	if (written) {
+		*written = 0;
+	}
+	return 0;
 }
 #endif /* HAVE_STDIO_H */
 

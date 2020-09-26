@@ -57,29 +57,20 @@ https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#longBitsToDouble
 #define Efloat_end_C_functions
 #endif
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#if HAVE_STDDEF_H
-#include <stddef.h>
-#endif
-
-#if HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
-#if HAVE_FLOAT_H
+/* Freestanding headers: */
 #include <float.h>
-#endif
-
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
+#include <limits.h>
+/* #include <stdarg.h> */
+#include <stddef.h>
+/* since AMD1 (1995 amendment to the C90): */
+/* #include <iso646.h> */
+/* since C99: */
+/* #include <stdbool.h> */
+#include <stdint.h>
+/* since C11: */
+/* #include <stdalign.h> */
+/* #include <stdnoreturn.h> */
+/* https://gcc.gnu.org/onlinedocs/gcc/Standards.html */
 
 #ifndef SKIP_EFLOAT_SIGNED_INTS
 #define SKIP_EFLOAT_SIGNED_INTS 0
@@ -255,10 +246,8 @@ enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields);
 efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 				      enum efloat_class *efloat32class);
-#if HAVE_STDIO_H
 char *efloat32_fields_to_expression(const struct efloat32_fields fields,
 				    char *buf, size_t len, int *written);
-#endif /* HAVE_STDIO_H */
 uint32_t efloat32_distance(efloat32 x, efloat32 y);
 #endif /* efloat32_exists */
 
@@ -276,10 +265,8 @@ enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields);
 efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 				      enum efloat_class *efloat64class);
-#if HAVE_STDIO_H
 char *efloat64_fields_to_expression(const struct efloat64_fields fields,
 				    char *buf, size_t len, int *written);
-#endif /* HAVE_STDIO_H */
 uint64_t efloat64_distance(efloat64 x, efloat64 y);
 #endif /* efloat64_exists */
 

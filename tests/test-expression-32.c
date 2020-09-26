@@ -176,7 +176,7 @@ int efloat32_expression_round_trip(efloat32 f)
 
 	snprintf(msg, 500, "f: %g, %s = %s (%g, %s)\n", f, expression, result,
 		 f2, expression2);
-	ep2 = (abs(f) * FLT_EPSILON * 2);
+	ep2 = (fabs(f) * FLT_EPSILON * 2);
 	epsilon = (ep1 > ep2) ? ep1 : ep2;
 	return check_double_m(f, f2, epsilon, msg);
 }
