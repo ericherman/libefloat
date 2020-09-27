@@ -217,7 +217,7 @@ struct efloat64_fields {
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists) \
- && (__SIZEOF_LONG__ >= 8))
+ && ((__SIZEOF_LONG__ >= 8) || (__SIZEOF_LONG_LONG__ >= 8)))
 #define efloat64_r2_exp_max 1023L
 #define efloat64_exp_max efloat64_r2_exp_max
 #define efloat64_r2_exp_min -1023L
