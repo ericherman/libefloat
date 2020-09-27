@@ -6,18 +6,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
-#if defined( _VARIANT_ARDUINO_DUE_X_ ) || defined( ARDUINO_SAM_DUE )
-#if ARDUINO_DUE_USB_PROGRAMMING == 1
-#define SerialObj Serial
-#else // default to the NATIVE port
-#define SerialObj SerialUSB
-#endif
-#endif
-
-#ifndef SerialObj
-#define SerialObj Serial
-#endif
-
 #include "efloat.h"
 
 /* globals */
@@ -25,60 +13,63 @@ uint32_t loop_count;
 
 void setup(void)
 {
-	SerialObj.begin(9600);
+	Serial.begin(9600);
 
 	delay(50);
 
-	SerialObj.println("Begin");
+	Serial.println("Begin");
 
 	loop_count = 0;
 }
 
 void loop(void)
 {
-	SerialObj.println("=================================================");
+	Serial.println("=================================================");
 	++loop_count;
 
-	SerialObj.print("sizeof(float) == ");
-	SerialObj.println(sizeof(float));
+	Serial.print("sizeof(float) == ");
+	Serial.println(sizeof(float));
 
-	SerialObj.print("sizeof(double) == ");
-	SerialObj.println(sizeof(double));
+	Serial.print("sizeof(double) == ");
+	Serial.println(sizeof(double));
 
-	SerialObj.print("sizeof(long double) == ");
-	SerialObj.println(sizeof(long double));
+	Serial.print("sizeof(long double) == ");
+	Serial.println(sizeof(long double));
 
-	SerialObj.print("sizeof(efloat32) == ");
-	SerialObj.println(sizeof(efloat32));
+	Serial.print("sizeof(efloat32) == ");
+	Serial.println(sizeof(efloat32));
 
-	SerialObj.print("sizeof(uint32_t) == ");
-	SerialObj.println(sizeof(uint32_t));
+	Serial.print("sizeof(uint32_t) == ");
+	Serial.println(sizeof(uint32_t));
 
-	SerialObj.println();
+	Serial.println();
 	float denominator = (loop_count * 1.0);
 	float f32 = (1.0 / denominator);
+	while (f32 < 0.02) {
+		f32 *= 16.0;
+	}
 
-	SerialObj.print("f32 == ");
-	SerialObj.println(f32);
-	SerialObj.println();
-	SerialObj.print("uint32_t u32 = efloat32_to_uint32_bits(");
-	SerialObj.print(f32);
-	SerialObj.println(")");
+	Serial.print("f32 == ");
+	Serial.println(f32);
+	Serial.println();
+	Serial.print("uint32_t u32 = efloat32_to_uint32_bits(");
+	Serial.print(f32);
+	Serial.println(")");
 
 	uint32_t u32 = efloat32_to_uint32_bits(f32);
-	SerialObj.print("u32 == ");
-	SerialObj.println(u32);
+	Serial.print("u32 == ");
+	Serial.println(u32);
 
-	SerialObj.println();
-	SerialObj.print("float f32r = uint32_bits_to_efloat32(");
-	SerialObj.print(u32);
-	SerialObj.println(")");
+	Serial.println();
+	Serial.print("float f32r = uint32_bits_to_efloat32(");
+	Serial.print(u32);
+	Serial.println(")");
 	float f32r = uint32_bits_to_efloat32(u32);
-	SerialObj.print("f32r == ");
-	SerialObj.println(f32r);
+	Serial.print("f32r == ");
+	Serial.println(f32r);
 
-	SerialObj.println();
-	SerialObj.print("Roundtrip ");
+	Serial.println();
+	Serial.print("Roundtrip ");
 	const char *result;
 	const char *symbol;
 	if (f32 == f32r) {
@@ -88,13 +79,13 @@ void loop(void)
 		result = "(f32 != f32r) FAIL!";
 		symbol = " != ";
 	}
-	SerialObj.print(f32);
-	SerialObj.print(symbol);
-	SerialObj.println(f32r);
-	SerialObj.print("Roundtrip ");
-	SerialObj.println(result);
-	SerialObj.println();
-	SerialObj.println("=================================================");
+	Serial.print(f32);
+	Serial.print(symbol);
+	Serial.println(f32r);
+	Serial.print("Roundtrip ");
+	Serial.println(result);
+	Serial.println();
+	Serial.println("=================================================");
 
 	delay(2000);
 }
