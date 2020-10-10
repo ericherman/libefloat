@@ -20,18 +20,7 @@ CC=gcc
 CSTD_CFLAGS=-std=c89 -pedantic -Wno-long-long
 
 # tests need "gnu89" for fpclassify
-TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long -DHAVE_SNPRINTF=1
-
-# C99:
-# -DHAVE_SNPRINTF=1
-
-SYSTEM_CONFIG_CFLAGS= \
- -DHAVE_ERRNO=1 \
- -DHAVE_ERRNO_H=1 \
- -DHAVE_INTTYPES_H=1 \
- -DHAVE_MEMCPY=1 \
- -DHAVE_STRING_H=1 \
- -DHAVE_STDIO_H=1
+TEST_CSTD_CFLAGS=-std=gnu89 -pedantic -Wno-long-long
 
 ifeq ($(UNAME), Darwin)
 SHAREDFLAGS = -dynamiclib
@@ -57,7 +46,6 @@ ifneq ($(strip $(srcdir)),)
    VPATH::=$(srcdir)
 endif
 
-
 # typical
 BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
 # profiling
@@ -68,14 +56,19 @@ BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
 
 NOISY_CFLAGS=-Werror -Wall -Wextra -Werror=cast-qual
 
-INCLUDES_CFLAGS=-I./src
+EEMBED_SRC=./submodules/libecheck/src
+
+INCLUDES_CFLAGS=-I./src -I$(EEMBED_SRC)
 
 BASE_CFLAGS=$(CFLAGS) \
  $(NOISY_CFLAGS) \
  $(BUILD_TYPE_CFLAGS) \
  $(INCLUDES_CFLAGS)
 
-LIB_CFLAGS=$(CSTD_CFLAGS) $(BASE_CFLAGS) $(SYSTEM_CONFIG_CFLAGS)
+LIB_CFLAGS=\
+ $(CSTD_CFLAGS) \
+ $(BASE_CFLAGS) \
+ $(SYSTEM_CONFIG_CFLAGS)
 
 ECHECK_SRC=./submodules/libecheck/src
 EHSTR_SRC=./submodules/libehstr/src
@@ -90,9 +83,11 @@ EFLT_LIB_SRC=src/efloat.c
 EFLT_LIB_HDR=src/efloat.h
 EFLT_LIB_OBJ=efloat.o
 
+EEMBED_OBJ=eembed.o
+
 LIB_NAME=libefloat
 
-SO_OBJS=$(EFLT_LIB_OBJ)
+SO_OBJS=$(EFLT_LIB_OBJ) $(EEMBED_OBJ)
 SO_NAME=$(LIB_NAME).$(SHAREDEXT)
 ifneq ($(UNAME), Darwin)
     SHAREDFLAGS += -Wl,-soname,$(SO_NAME)
@@ -100,7 +95,7 @@ endif
 
 A_NAME=libefloat.a
 
-TEST_COMMON_SRC=$(ECHECK_SRC)/echeck.h $(ECHECK_SRC)/echeck.c
+ECHECK_OBJ=echeck.o
 
 TEST_RT_32_SRC=tests/test-round-trip-32.c
 TEST_RT_32_OBJ=test-round-trip-32.o
@@ -127,8 +122,11 @@ TEST_DEMO_EXE=libefloat-demo
 
 default: library
 
-echeck.o: $(ECHECK_SRC)/echeck.h $(ECHECK_SRC)/echeck.c
-	$(CC) -c -fPIC $(TEST_CFLAGS) $(ECHECK_SRC)/echeck.c -o echeck.o
+$(ECHECK_OBJ): $(ECHECK_SRC)/echeck.h $(ECHECK_SRC)/echeck.c
+	$(CC) -c -fPIC $(TEST_CFLAGS) $(ECHECK_SRC)/echeck.c -o $(ECHECK_OBJ)
+
+$(EEMBED_OBJ): $(EEMBED_SRC)/eembed.h $(EEMBED_SRC)/eembed.c
+	$(CC) -c -fPIC $(TEST_CFLAGS) $(EEMBED_SRC)/eembed.c -o $(EEMBED_OBJ)
 
 $(EFLT_LIB_OBJ): $(EFLT_LIB_HDR) $(EFLT_LIB_SRC)
 	$(CC) -c -fPIC $(LIB_CFLAGS) $(EFLT_LIB_SRC) -o $(EFLT_LIB_OBJ)
@@ -166,12 +164,13 @@ $(TEST_DIST_32_EXE)-dynamic: $(TEST_DIST_32_OBJ) $(SO_NAME)
 	$(CC) $(TEST_DIST_32_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_DIST_32_EXE)-dynamic $(TEST_LDADD)
 
-$(TEST_EXPRESSION_32_OBJ): $(EFLT_LIB_HDR) $(TEST_EXPRESSION_32_SRC) echeck.o
-	$(CC) -c $(SYSTEM_CONFIG_CFLAGS) $(TEST_CFLAGS) \
+$(TEST_EXPRESSION_32_OBJ): $(EFLT_LIB_HDR) $(TEST_EXPRESSION_32_SRC)
+	$(CC) -c $(TEST_CFLAGS) \
 	$(TEST_EXPRESSION_32_SRC) -o $(TEST_EXPRESSION_32_OBJ)
 
-$(TEST_EXPRESSION_32_EXE)-dynamic: $(TEST_EXPRESSION_32_OBJ) $(SO_NAME)
-	$(CC) $(TEST_EXPRESSION_32_OBJ) echeck.o $(TEST_LDFLAGS) \
+$(TEST_EXPRESSION_32_EXE)-dynamic: $(TEST_EXPRESSION_32_OBJ) $(SO_NAME) \
+		$(ECHECK_OBJ)
+	$(CC) $(TEST_EXPRESSION_32_OBJ) $(ECHECK_OBJ) $(TEST_LDFLAGS) \
 		-o $(TEST_EXPRESSION_32_EXE)-dynamic $(TEST_LDADD)
 
 check-32-static: $(TEST_RT_32_EXE)-static warn-if-fpclassify-mismatch
@@ -236,7 +235,7 @@ valgrind-64: ./$(TEST_RT_64_EXE)-static
 valgrind: valgrind-32 valgrind-64
 
 float-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
-	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+	$(CC) $(EEMBED_OBJ) \
 		$(TEST_CFLAGS) \
 		-I./demo \
 		-I$(EHSTR_SRC) \
@@ -245,7 +244,7 @@ float-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 		demo/float-to-fields.c -o float-to-fields
 
 double-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
-	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+	$(CC) $(EEMBED_OBJ) \
 		$(TEST_CFLAGS) \
 		-I./demo \
 		-I$(EHSTR_SRC) \
@@ -254,7 +253,7 @@ double-to-fields: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 		demo/double-to-fields.c -o double-to-fields
 
 fields-to-float: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
-	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+	$(CC) $(EEMBED_OBJ) \
 		$(TEST_CFLAGS) \
 		-I./demo \
 		-I$(EHSTR_SRC) \
@@ -263,7 +262,7 @@ fields-to-float: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
 		demo/fields-to-float.c -o fields-to-float
 
 fields-to-double: $(A_NAME) $(EHSTR_SRC)/ehstr.h $(EHSTR_SRC)/ehstr.c
-	$(CC) $(SYSTEM_CONFIG_CFLAGS) \
+	$(CC) $(EEMBED_OBJ) \
 		$(TEST_CFLAGS) \
 		-I./demo \
 		-I$(EHSTR_SRC) \
@@ -308,7 +307,8 @@ tidy:
 		-T FILE -T size_t -T ssize_t \
 		-T uint8_t -T uint16_t -T uint32_t -T uint64_t \
 		-T int8_t -T int16_t -T int32_t -T int64_t \
-		`find src tests demo -name '*.h' -o -name '*.c'`
+		`find src tests demo -name '*.h' -o -name '*.c'` \
+		efloat_arduino/efloat_arduino.ino
 
 spotless:
 	git clean -dxf

@@ -4,118 +4,90 @@
 /* https://github.com/ericherman/libefloat */
 
 #include "efloat.h"
+#include "eembed.h"
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifndef eprintf2
-#if HAVE_STDIO_H
-#include <stdio.h>
-#define eprintf2(fmt, a, b) fprintf(stderr, fmt, a, b)
-#else
-#define eprintf2(fmt, a, b)	/* NOOP */
-#endif
+#ifndef UINT32_MAX
+#define UINT32_MAX  (0xFFFFFFFF)
 #endif
 
-#ifndef HAVE_MEMCPY
-#define HAVE_MEMCPY 0
+#ifndef UINT64_MAX
+#define UINT64_MAX  (0xFFFFFFFFFFFFFFFF)
 #endif
-#ifndef HAVE_STRING_H
-#define HAVE_STRING_H 0
-#endif
-#if (HAVE_MEMCPY && HAVE_STRING_H)
-#include <string.h>		/* memcpy */
-#endif
-/*
-   If no memcpy(), then we can use type-punning via a union.
-   The C standard reads ambuguously to me as to whether this is strictly
-   conforming, but I know of no compilers which do not support it.
 
-   The calls to memcpy() here are probably going to be removed by gcc:
-   gcc output: https://godbolt.org/g/hiX8oL
-*/
-
-#if HAVE_ERRNO_H
+#if EEMBED_HOSTED
 #include <errno.h>
-#define seterrnoinval() do { errno = EINVAL; } while (0)
-#endif
+void efloat_set_errno_einval(void)
+{
+	errno = EINVAL;
+}
 
-#ifndef seterrnoinval
-#define seterrnoinval()		/* NOOP */
-#endif
-
-#if HAVE_STDIO_H
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
+void (*efloat_seterrinval)(void) = efloat_set_errno_einval;
 #else
-
-#ifndef PRId8
-#define PRId8 "d"
+void (*efloat_seterrinval)(void) = NULL;
 #endif
 
-#ifndef PRId16
-#define PRId16 "d"
-#endif
+#define Efloat_set_err_inval() \
+	do { \
+		if (efloat_seterrinval) { \
+			efloat_seterrinval(); \
+		} \
+	} while (0)
 
-#ifndef PRIu32
-#define PRIu32 "u"
-#endif
+#define Efloat_debug_print_str(str) do { \
+	if (eembed_err_log) { \
+		eembed_err_log->append_s(eembed_err_log, str); \
+	} } while (0)
 
-#ifndef PRIu64
-#if (ULONG_MAX == 4294967295UL)
-#define PRIu64 "llu"
-#else
-#define PRIu64 "lu"
-#endif /* (ULONG_MAX == 4294967295UL) */
-#endif /* PRIu64 */
-#endif /* HAVE_INTTYPES_H */
-#endif /* HAVE_STDIO_H */
+#define Efloat_debug_print_u64(u64) do { \
+	if (eembed_err_log) { \
+		eembed_err_log->append_ul(eembed_err_log, u64); \
+	} } while (0)
+
+#define Efloat_debug_print_i32(i32) do { \
+	if (eembed_err_log) { \
+		eembed_err_log->append_l(eembed_err_log, i32); \
+	} } while (0)
+
+#define Efloat_debug_print_eol() do { \
+	if (eembed_err_log) { \
+		eembed_err_log->append_eol(eembed_err_log); \
+	} } while (0)
 
 #if ((defined efloat32_exists) && (efloat32_exists))
-#if HAVE_MEMCPY
-efloat32 uint32_bits_to_efloat32(uint32_t u)
+static int32_t efloat32_to_int32_bits_memcpy(efloat32 f)
 {
-	efloat32 f;
-	memcpy(&f, &u, sizeof(efloat32));
-	return f;
+	int32_t i;
+	eembed_memcpy(&i, &f, sizeof(int32_t));
+	return i;
 }
 
-uint32_t efloat32_to_uint32_bits(efloat32 f)
+static int32_t efloat32_to_int32_bits_unionp(efloat32 f)
 {
-	uint32_t u;
-	memcpy(&u, &f, sizeof(uint32_t));
-	return u;
-}
-
-#if !SKIP_EFLOAT_SIGNED_INTS
-efloat32 int32_bits_to_efloat32(int32_t i)
-{
-	efloat32 f;
-	memcpy(&f, &i, sizeof(efloat32));
-	return f;
+	union efloat32_u {
+		efloat32 f;
+		int32_t i;
+	} pun;
+	pun.f = f;
+	return pun.i;
 }
 
 int32_t efloat32_to_int32_bits(efloat32 f)
 {
-	int32_t i;
-	memcpy(&i, &f, sizeof(int32_t));
-	return i;
+	if (eembed_memcpy) {
+		return efloat32_to_int32_bits_memcpy(f);
+	} else {
+		return efloat32_to_int32_bits_unionp(f);
+	}
 }
-#endif /* !SKIP_EFLOAT_SIGNED_INTS */
-#else /* HAVE_MEMCPY */
 
-efloat32 uint32_bits_to_efloat32(uint32_t u)
+static uint32_t efloat32_to_uint32_bits_memcpy(efloat32 f)
 {
-	union efloat32_u {
-		efloat32 f;
-		uint32_t u;
-	} pun;
-	pun.u = u;
-	return pun.f;
+	uint32_t u;
+	eembed_memcpy(&u, &f, sizeof(uint32_t));
+	return u;
 }
 
-uint32_t efloat32_to_uint32_bits(efloat32 f)
+static uint32_t efloat32_to_uint32_bits_unionp(efloat32 f)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -125,8 +97,23 @@ uint32_t efloat32_to_uint32_bits(efloat32 f)
 	return pun.u;
 }
 
-#if !SKIP_EFLOAT_SIGNED_INTS
-efloat32 int32_bits_to_efloat32(int32_t i)
+uint32_t efloat32_to_uint32_bits(efloat32 f)
+{
+	if (eembed_memcpy) {
+		return efloat32_to_uint32_bits_memcpy(f);
+	} else {
+		return efloat32_to_uint32_bits_unionp(f);
+	}
+}
+
+static efloat32 int32_bits_to_efloat32_memcpy(int32_t i)
+{
+	efloat32 f;
+	eembed_memcpy(&f, &i, sizeof(efloat32));
+	return f;
+}
+
+static efloat32 int32_bits_to_efloat32_unionp(int32_t i)
 {
 	union efloat32_u {
 		efloat32 f;
@@ -136,17 +123,40 @@ efloat32 int32_bits_to_efloat32(int32_t i)
 	return pun.f;
 }
 
-int32_t efloat32_to_int32_bits(efloat32 f)
+efloat32 int32_bits_to_efloat32(int32_t i)
+{
+	if (eembed_memcpy) {
+		return int32_bits_to_efloat32_memcpy(i);
+	} else {
+		return int32_bits_to_efloat32_unionp(i);
+	}
+}
+
+static efloat32 uint32_bits_to_efloat32_memcpy(uint32_t u)
+{
+	efloat32 f;
+	eembed_memcpy(&f, &u, sizeof(efloat32));
+	return f;
+}
+
+static efloat32 uint32_bits_to_efloat32_unionp(uint32_t u)
 {
 	union efloat32_u {
 		efloat32 f;
-		int32_t i;
+		uint32_t u;
 	} pun;
-	pun.f = f;
-	return pun.i;
+	pun.u = u;
+	return pun.f;
 }
-#endif /* !SKIP_EFLOAT_SIGNED_INTS */
-#endif /* HAVE_MEMCPY */
+
+efloat32 uint32_bits_to_efloat32(uint32_t u)
+{
+	if (eembed_memcpy) {
+		return uint32_bits_to_efloat32_memcpy(u);
+	} else {
+		return uint32_bits_to_efloat32_unionp(u);
+	}
+}
 
 enum efloat_class efloat32_classify(efloat32 f)
 {
@@ -214,7 +224,7 @@ efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 
 	raw_exp = fields.exponent;
 	if (raw_exp > efloat32_r2_exp_inf_nan || raw_exp < efloat32_r2_exp_min) {
-		seterrnoinval();
+		Efloat_set_err_inval();
 		err = 1;
 		raw_exp = efloat32_r2_exp_inf_nan;
 	}
@@ -225,7 +235,7 @@ efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 	    : (fields.significand);
 
 	if (raw_significand != (raw_significand & efloat32_r2_signif_mask)) {
-		seterrnoinval();
+		Efloat_set_err_inval();
 		err = 1;
 		raw_significand = (raw_significand & efloat32_r2_signif_mask);
 	}
@@ -242,68 +252,64 @@ efloat32 efloat32_radix_2_from_fields(const struct efloat32_fields fields,
 	}
 	if (!err) {
 		if ((!fields.sign) != (!f2.sign)) {
-			seterrnoinval();
-			eprintf2("sign %u != %u\n",
-				 (unsigned)fields.sign, (unsigned)f2.sign);
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("sign ");
+			Efloat_debug_print_i32(fields.sign);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_i32(f2.sign);
+			Efloat_debug_print_eol();
 		}
 		if (fields.exponent != f2.exponent) {
-			seterrnoinval();
-			eprintf2("exponent %d != %d\n",
-				 (int)fields.exponent, (int)f2.exponent);
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("exponent ");
+			Efloat_debug_print_i32(fields.exponent);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_i32(f2.exponent);
+			Efloat_debug_print_eol();
 		}
 		if (fields.significand != f2.significand) {
-			seterrnoinval();
-			eprintf2("significand %lu != %lu\n",
-				 (unsigned long)fields.significand,
-				 (unsigned long)fields.significand);
+			Efloat_set_err_inval();
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("exponent ");
+			Efloat_debug_print_u64(fields.significand);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_u64(f2.significand);
+			Efloat_debug_print_eol();
 		}
 	}
 	return f;
 }
 
-#if HAVE_STDIO_H
 char *efloat32_fields_to_expression(const struct efloat32_fields fields,
 				    char *buf, size_t len, int *written)
 {
-	const char *fmt;
-	int rv;
+	struct eembed_log log;
+	struct eembed_str_buf sbuf;
+	struct eembed_log *bl;
 
-	fmt = "(%" PRId8 " * (2^%" PRId16 ") * (%" PRIu32 " / (2^%u)))";
-	rv = 0;
-
-#if HAVE_SNPRINTF
-	rv = snprintf(buf, len, fmt, fields.sign, fields.exponent,
-		      fields.significand, efloat_float_exp_shift);
-#else
-	if (len <= (strlen(fmt) + 15)) {
-		rv = -1;
-	} else {
-		rv = sprintf(buf, fmt, fields.sign, fields.exponent,
-			     fields.significand, efloat_float_exp_shift);
-	}
-#endif /* HAVE_SNPRINTF */
-
-	if (written) {
-		*written = rv;
-	}
-	return (rv > 0) ? buf : NULL;
-}
-#else
-char *efloat32_fields_to_expression(const struct efloat32_fields fields,
-				    char *buf, size_t len, int *written)
-{
-	/* ignore fields */
-	(void)fields;
-
-	if (len) {
+	if (buf && len) {
 		buf[0] = '\0';
 	}
-	if (written) {
-		*written = 0;
+	bl = eembed_char_buf_log_init(&log, &sbuf, buf, len);
+	if (!bl) {
+		return NULL;
 	}
-	return 0;
+
+	bl->append_s(bl, "(");
+	bl->append_l(bl, fields.sign);
+	bl->append_s(bl, " * (2^");
+	bl->append_l(bl, fields.exponent);
+	bl->append_s(bl, ") * (");
+	bl->append_l(bl, fields.significand);
+	bl->append_s(bl, " / (2^");
+	bl->append_ul(bl, efloat_float_exp_shift);
+	bl->append_s(bl, ")))");
+
+	if (written) {
+		*written = eembed_strnlen(buf, len);
+	}
+	return (eembed_strstr(buf, ")))")) ? buf : NULL;
 }
-#endif /* HAVE_STDIO_H */
 
 uint32_t efloat32_distance(efloat32 x, efloat32 y)
 {
@@ -349,48 +355,40 @@ uint32_t efloat32_distance(efloat32 x, efloat32 y)
 #endif
 
 #if ((defined efloat64_exists) && (efloat64_exists))
-#if HAVE_MEMCPY
-efloat64 uint64_bits_to_efloat64(uint64_t u)
+static int64_t efloat64_to_int64_bits_memcpy(efloat64 f)
 {
-	efloat64 f;
-	memcpy(&f, &u, sizeof(efloat64));
-	return f;
+	int64_t i;
+	eembed_memcpy(&i, &f, sizeof(int64_t));
+	return i;
 }
 
-uint64_t efloat64_to_uint64_bits(efloat64 f)
+static int64_t efloat64_to_int64_bits_unionp(efloat64 f)
 {
-	uint64_t u;
-	memcpy(&u, &f, sizeof(uint64_t));
-	return u;
-}
-
-#if !SKIP_EFLOAT_SIGNED_INTS
-efloat64 int64_bits_to_efloat64(int64_t i)
-{
-	efloat64 f;
-	memcpy(&f, &i, sizeof(efloat64));
-	return f;
+	union efloat64_u {
+		efloat64 f;
+		int64_t i;
+	} pun;
+	pun.f = f;
+	return pun.i;
 }
 
 int64_t efloat64_to_int64_bits(efloat64 f)
 {
-	int64_t i;
-	memcpy(&i, &f, sizeof(int64_t));
-	return i;
-}
-#endif /* !SKIP_EFLOAT_SIGNED_INTS */
-#else /* HAVE MEMCPY */
-efloat64 uint64_bits_to_efloat64(uint64_t u)
-{
-	union efloat64_u {
-		efloat64 f;
-		uint64_t u;
-	} pun;
-	pun.u = u;
-	return pun.f;
+	if (eembed_memcpy) {
+		return efloat64_to_int64_bits_memcpy(f);
+	} else {
+		return efloat64_to_int64_bits_unionp(f);
+	}
 }
 
-uint64_t efloat64_to_uint64_bits(efloat64 f)
+static uint64_t efloat64_to_uint64_bits_memcpy(efloat64 f)
+{
+	uint64_t u;
+	eembed_memcpy(&u, &f, sizeof(uint64_t));
+	return u;
+}
+
+static uint64_t efloat64_to_uint64_bits_unionp(efloat64 f)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -400,8 +398,23 @@ uint64_t efloat64_to_uint64_bits(efloat64 f)
 	return pun.u;
 }
 
-#if !SKIP_EFLOAT_SIGNED_INTS
-efloat64 int64_bits_to_efloat64(int64_t i)
+uint64_t efloat64_to_uint64_bits(efloat64 f)
+{
+	if (eembed_memcpy) {
+		return efloat64_to_uint64_bits_memcpy(f);
+	} else {
+		return efloat64_to_uint64_bits_unionp(f);
+	}
+}
+
+static efloat64 int64_bits_to_efloat64_memcpy(int64_t i)
+{
+	efloat64 f;
+	eembed_memcpy(&f, &i, sizeof(efloat64));
+	return f;
+}
+
+static efloat64 int64_bits_to_efloat64_unionp(int64_t i)
 {
 	union efloat64_u {
 		efloat64 f;
@@ -411,17 +424,40 @@ efloat64 int64_bits_to_efloat64(int64_t i)
 	return pun.f;
 }
 
-int64_t efloat64_to_int64_bits(efloat64 f)
+efloat64 int64_bits_to_efloat64(int64_t i)
+{
+	if (eembed_memcpy) {
+		return int64_bits_to_efloat64_memcpy(i);
+	} else {
+		return int64_bits_to_efloat64_unionp(i);
+	}
+}
+
+static efloat64 uint64_bits_to_efloat64_memcpy(uint64_t u)
+{
+	efloat64 f;
+	eembed_memcpy(&f, &u, sizeof(efloat64));
+	return f;
+}
+
+static efloat64 uint64_bits_to_efloat64_unionp(uint64_t u)
 {
 	union efloat64_u {
 		efloat64 f;
-		int64_t i;
+		uint64_t u;
 	} pun;
-	pun.f = f;
-	return pun.i;
+	pun.u = u;
+	return pun.f;
 }
-#endif /* !SKIP_EFLOAT_SIGNED_INTS */
-#endif /* HAVE_MEMCPY */
+
+efloat64 uint64_bits_to_efloat64(uint64_t u)
+{
+	if (eembed_memcpy) {
+		return uint64_bits_to_efloat64_memcpy(u);
+	} else {
+		return uint64_bits_to_efloat64_unionp(u);
+	}
+}
 
 enum efloat_class efloat64_classify(efloat64 f)
 {
@@ -490,7 +526,7 @@ efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 
 	raw_exp = fields.exponent;
 	if (raw_exp > efloat64_r2_exp_inf_nan || raw_exp < efloat64_r2_exp_min) {
-		seterrnoinval();
+		Efloat_set_err_inval();
 		err = 1;
 		raw_exp = efloat64_r2_exp_inf_nan;
 	}
@@ -501,7 +537,7 @@ efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 	    : (fields.significand);
 
 	if (raw_significand != (raw_significand & efloat64_r2_signif_mask)) {
-		seterrnoinval();
+		Efloat_set_err_inval();
 		err = 1;
 		raw_significand = (raw_significand & efloat64_r2_signif_mask);
 	}
@@ -518,69 +554,64 @@ efloat64 efloat64_radix_2_from_fields(const struct efloat64_fields fields,
 	}
 	if (!err) {
 		if ((!fields.sign) != (!f2.sign)) {
-			seterrnoinval();
-			eprintf2("sign %u != %u\n",
-				 (unsigned)fields.sign, (unsigned)f2.sign);
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("sign ");
+			Efloat_debug_print_i32(fields.sign);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_i32(f2.sign);
+			Efloat_debug_print_eol();
 		}
 		if (fields.exponent != f2.exponent) {
-			seterrnoinval();
-			eprintf2("exponent %d != %d\n",
-				 (int)fields.exponent, (int)f2.exponent);
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("exponent ");
+			Efloat_debug_print_i32(fields.exponent);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_i32(f2.exponent);
+			Efloat_debug_print_eol();
 		}
 		if (fields.significand != f2.significand) {
-			seterrnoinval();
-			eprintf2("significand %lu != %lu\n",
-				 (unsigned long)fields.significand,
-				 (unsigned long)fields.significand);
+			Efloat_set_err_inval();
+			Efloat_set_err_inval();
+			Efloat_debug_print_str("exponent ");
+			Efloat_debug_print_u64(fields.significand);
+			Efloat_debug_print_str(" != ");
+			Efloat_debug_print_u64(f2.significand);
+			Efloat_debug_print_eol();
 		}
 	}
 	return f;
 }
 
-#if HAVE_STDIO_H
 char *efloat64_fields_to_expression(const struct efloat64_fields fields,
 				    char *buf, size_t len, int *written)
 {
-	const char *fmt;
-	int rv;
+	struct eembed_log log;
+	struct eembed_str_buf sbuf;
+	struct eembed_log *bl;
 
-	fmt = "(%" PRId8 " * (2^%" PRId16 ") * (%" PRIu64 " / (2^%u)))";
-	rv = 0;
-
-#if HAVE_SNPRINTF
-	rv = snprintf(buf, len, fmt, fields.sign, fields.exponent,
-		      fields.significand, efloat_double_exp_shift);
-#else
-	if (len <= (strlen(fmt) + 30)) {
-		rv = -1;
-	} else {
-		rv = sprintf(buf, fmt, fields.sign, fields.exponent,
-			     fields.significand, efloat_double_exp_shift);
-	}
-#endif /* HAVE_SNPRINTF */
-
-	if (written) {
-		*written = rv;
-	}
-
-	return rv > 0 ? buf : NULL;
-}
-#else
-char *efloat64_fields_to_expression(const struct efloat64_fields fields,
-				    char *buf, size_t len, int *written)
-{
-	/* ignore fields */
-	(void)fields;
-
-	if (len) {
+	if (buf && len) {
 		buf[0] = '\0';
 	}
-	if (written) {
-		*written = 0;
+	bl = eembed_char_buf_log_init(&log, &sbuf, buf, len);
+	if (!bl) {
+		return NULL;
 	}
-	return 0;
+
+	bl->append_s(bl, "(");
+	bl->append_l(bl, fields.sign);
+	bl->append_s(bl, " * (2^");
+	bl->append_l(bl, fields.exponent);
+	bl->append_s(bl, ") * (");
+	bl->append_l(bl, fields.significand);
+	bl->append_s(bl, " / (2^");
+	bl->append_ul(bl, efloat_float_exp_shift);
+	bl->append_s(bl, ")))");
+
+	if (written) {
+		*written = eembed_strnlen(buf, len);
+	}
+	return (eembed_strstr(buf, ")))")) ? buf : NULL;
 }
-#endif /* HAVE_STDIO_H */
 
 uint64_t efloat64_distance(efloat64 x, efloat64 y)
 {

@@ -5,10 +5,10 @@
 /*
    gcc -pipe -g -O2 -std=gnu89 -pedantic -Wno-long-long -Werror -Wall -Wextra \
     -Werror=cast-qual -fomit-frame-pointer -DNDEBUG \
-    -DHAVE_ERRNO=1 -DHAVE_ERRNO_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_MEMCPY=1 \
-    -DHAVE_STRING_H=1 -DHAVE_SATDIO_H=1 -DHAVE_SNPRINTF=1 \
-    -I./src -I./submodules/libehstr/src -I./demo \
+    -I./src -I./submodules/libehstr/src \
+    -I./submodules/libecheck/src -I./demo \
     src/efloat.c ./submodules/libehstr/src/ehstr.c \
+    ./submodules/libecheck/src/eembed.c \
     demo/float-to-fields.c -o float-to-fields
 */
 

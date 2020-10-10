@@ -121,7 +121,6 @@ int uint64_efloat64_round_trip(uint64_t u)
 	return 0;
 }
 
-#if ((defined efloat64_also_signed_ints) && (efloat64_also_signed_ints))
 int int64_efloat64_round_trip(int64_t i)
 {
 	int err;
@@ -148,16 +147,6 @@ int int64_efloat64_round_trip(int64_t i)
 
 	return 0;
 }
-#else
-int int64_efloat64_round_trip(int64_t i)
-{
-	uint64_t u;
-
-	u = (i < 0) ? ((UINT64_MAX) - ((uint64_t)(-i))) : ((uint64_t)i);
-
-	return uint64_efloat64_round_trip(u);
-}
-#endif
 
 int main(int argc, char **argv)
 {

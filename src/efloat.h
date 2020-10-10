@@ -72,9 +72,7 @@ https://docs.oracle.com/javase/7/docs/api/java/lang/Double.html#longBitsToDouble
 /* #include <stdnoreturn.h> */
 /* https://gcc.gnu.org/onlinedocs/gcc/Standards.html */
 
-#ifndef SKIP_EFLOAT_SIGNED_INTS
-#define SKIP_EFLOAT_SIGNED_INTS 0
-#endif
+extern void (*efloat_seterrinval)(void);
 
 /* maybe one day we will want RADIX != 2, but I doubt it */
 #define efloat32_radix 2
@@ -235,12 +233,12 @@ struct efloat64_fields {
 Efloat_begin_C_functions
 /* first the efloat32 functions */
 #if efloat32_exists
-efloat32 uint32_bits_to_efloat32(uint32_t i);
-uint32_t efloat32_to_uint32_bits(efloat32 f);
-#if (!SKIP_EFLOAT_SIGNED_INTS)
-efloat32 int32_bits_to_efloat32(int32_t i);
 int32_t efloat32_to_int32_bits(efloat32 f);
-#endif /* (!SKIP_EFLOAT_SIGNED_INTS) */
+uint32_t efloat32_to_uint32_bits(efloat32 f);
+
+efloat32 int32_bits_to_efloat32(int32_t i);
+efloat32 uint32_bits_to_efloat32(uint32_t i);
+
 enum efloat_class efloat32_classify(efloat32 f);
 enum efloat_class efloat32_radix_2_to_fields(efloat32 f,
 					     struct efloat32_fields *fields);
@@ -254,12 +252,12 @@ uint32_t efloat32_distance(efloat32 x, efloat32 y);
 /* next the efloat64 functions */
 
 #if efloat64_exists
-efloat64 uint64_bits_to_efloat64(uint64_t i);
-uint64_t efloat64_to_uint64_bits(efloat64 f);
-#if (!SKIP_EFLOAT_SIGNED_INTS)
-efloat64 int64_bits_to_efloat64(int64_t i);
 int64_t efloat64_to_int64_bits(efloat64 f);
-#endif /* (!SKIP_EFLOAT_SIGNED_INTS) */
+uint64_t efloat64_to_uint64_bits(efloat64 f);
+
+efloat64 int64_bits_to_efloat64(int64_t i);
+efloat64 uint64_bits_to_efloat64(uint64_t i);
+
 enum efloat_class efloat64_classify(efloat64 f);
 enum efloat_class efloat64_radix_2_to_fields(efloat64 f,
 					     struct efloat64_fields *fields);

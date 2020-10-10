@@ -4,8 +4,7 @@
 /* https://github.com/ericherman/libefloat */
 /*
 gcc -pipe -g -Wall -Wextra -Werror -pedantic \
- -DHAVE_ERRNO=1 -DHAVE_ERRNO_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_MEMCPY=1 \
- -DHAVE_STRING_H=1 -DHAVE_SATDIO_H=1 -DHAVE_SNPRINTF=1 \
+ -I./submodules/libecheck/src ./submodules/libecheck/src/eembed.c \
  -I./src src/efloat.c demo/u32-to-f32.c -o u32-to-f32
 */
 
