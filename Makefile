@@ -54,7 +54,7 @@ BUILD_TYPE_CFLAGS=-g -O2 -fomit-frame-pointer -DNDEBUG
 #BUILD_TYPE_CFLAGS=-g -O0 -DDEBUG=1
 
 
-NOISY_CFLAGS=-Werror -Wall -Wextra -Werror=cast-qual
+NOISY_CFLAGS=-Werror -Wall -Wextra -Werror=cast-qual -Wc++-compat
 
 EEMBED_SRC=./submodules/libecheck/src
 
