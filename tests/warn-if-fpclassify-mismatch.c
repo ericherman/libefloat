@@ -19,13 +19,14 @@ Using Darwin LibC, math.h has:
 #define FP_SUBNORMAL    5
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <math.h>
 #include <stdint.h>
-#include <efloat.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "efloat.h"
 
 int check_fpclassify_mismatch(void)
 {

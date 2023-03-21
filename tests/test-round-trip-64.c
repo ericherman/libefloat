@@ -3,13 +3,14 @@
 /* Copyright (C) 2017, 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <math.h>
 #include <stdint.h>
-#include <efloat.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "efloat.h"
 
 int check_fpclassify(enum efloat_class cls, efloat64 f)
 {

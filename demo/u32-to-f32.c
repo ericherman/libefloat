@@ -8,16 +8,17 @@ gcc -pipe -g -Wall -Wextra -Werror -pedantic \
  -I./src src/efloat.c demo/u32-to-f32.c -o u32-to-f32
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
-#include <limits.h>
-#include <stdint.h>
-#include <efloat.h>
 #include <assert.h>
 #include <errno.h>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "efloat.h"
 
 int parse_and_print_u32_to_f32(const char *str, int base)
 {

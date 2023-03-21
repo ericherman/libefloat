@@ -8,16 +8,17 @@ gcc -pipe -g -Wall -Wextra -Werror -pedantic \
  -I./src src/efloat.c demo/u64-to-f64.c -o u64-to-f64
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
-#include <limits.h>
-#include <stdint.h>
-#include <efloat.h>
 #include <assert.h>
 #include <errno.h>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "efloat.h"
 
 int parse_and_print_u64_to_f64(const char *str, int base)
 {

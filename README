@@ -41,7 +41,7 @@ float.h vales are defined:
  * LDBL_MAX_EXP
  * LDBL_MANT_DIG
 
-#include <efloat.h>
+#include "efloat.h"
 
  * If "float", "double", or "long double" are either 32 or 64 bits,
    the values "efloat_float", "efloat_double", and/or "efloat_long_double"

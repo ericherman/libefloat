@@ -3,19 +3,20 @@
 /* Copyright (C) 2017, 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <math.h>
 #include <stdint.h>
-#include <efloat.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "efloat.h"
 
 int check_fpclassify(enum efloat_class cls, efloat32 f)
 {
 	int err = 0;
 	const char *fpstr;
-	char *ef_strs[] =
+	const char *ef_strs[] =
 	    { "ef_nan", "ef_inf", "ef_zero", "ef_subnorm", "ef_normal" };
 
 	switch (cls) {

@@ -3,13 +3,13 @@
 /* Copyright (C) 2017, 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 
-#include <stdint.h>
 #include <float.h>
-#include <efloat.h>
-
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+
+#include "efloat.h"
 
 int check_efloat64_distance(efloat64 x, efloat64 y, uint64_t expect,
 			    int verbose)

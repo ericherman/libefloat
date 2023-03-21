@@ -15,8 +15,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <echeck.h>
-#include <efloat.h>
+#include "echeck.h"
+#include "efloat.h"
 
 ssize_t eval_expression(const char *expression, char *buffer, size_t len)
 {

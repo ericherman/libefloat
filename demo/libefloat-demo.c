@@ -22,14 +22,15 @@ $
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <assert.h>
 #include <float.h>
 #include <limits.h>
+#include <math.h>
 #include <stdint.h>
-#include <efloat.h>
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "efloat.h"
 
 int main(int argc, char **argv)
 {
