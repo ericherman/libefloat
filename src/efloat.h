@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
-/* efloat.h: Embedable Float manipulation library */
+/* efloat.h: Embeddable Float manipulation library */
 /* Copyright (C) 2017, 2018, 2019 Eric Herman */
 /* https://github.com/ericherman/libefloat */
 

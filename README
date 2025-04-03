@@ -1,4 +1,4 @@
-efloat: Embedable Float manipulation library
+efloat: Embeddable Float manipulation library
 
 The goal of this library is to provide functions which can be added
 to embedded projects, especially those which wish to transfer

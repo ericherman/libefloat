@@ -1,4 +1,4 @@
-# Makefile: Embedable Float manipulation library
+# Makefile: Embeddable Float manipulation library
 # Copyright (C) 2017, 2018 Eric Herman
 #
 # https://github.com/ericherman/libefloat
